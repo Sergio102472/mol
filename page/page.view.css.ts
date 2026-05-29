@@ -1,27 +1,24 @@
 namespace $.$$ {
 
 	const { per , rem } = $mol_style_unit
-	const { calc } = $mol_style_func
+	const { hsla, blur } = $mol_style_func
 
 	$mol_style_define( $mol_page , {
 
 		display: 'flex' ,
-		margin: 0 ,
-		flexDirection: 'column' ,
-		flex: 'auto',
+		flex: {
+			basis: 'auto' ,
+			direction: 'column' ,
+		},
 		position: 'relative' ,
 		alignSelf: 'stretch' ,
 		maxWidth: per(100) ,
 		maxHeight: per(100) ,
 		boxSizing: 'border-box' ,
-		background: {
-			color: $mol_theme.back ,
-		},
 		color: $mol_theme.text ,
-		zIndex: 0 ,
-		overflow: 'hidden',
-		boxShadow: `0 0 .5rem hsla(0,0%,0%,.25)` ,
-
+		// backdropFilter: blur( `3px` ), enforces layering
+		// zIndex: 0 ,
+		
 		':focus': {
 			outline: 'none',
 		} ,
@@ -29,45 +26,74 @@ namespace $.$$ {
 		Head: {
 			display: 'flex' ,
 			flexWrap: 'wrap' ,
-			justifyContent: 'space-between' ,
+			justifyContent: 'flex-end' ,
 			flex: 'none',
 			position: 'relative' ,
 			margin: 0 ,
-			minHeight: calc(`1.5em + 2rem`) ,
-			padding: rem(.5) ,
+			minHeight: rem(4),
+			padding: $mol_gap.block ,
 			background: {
-				color: $mol_theme.back ,
+				color: $mol_theme.card ,
 			},
-			boxShadow: `0 0 .5rem hsla(0,0%,0%,.25)` ,
-			zIndex: 1,
+			border: {
+				radius: $mol_gap.round,
+			},
+			box: {
+				shadow: [
+					[ 0, `-0.5rem`, `0.5rem`, `-0.5rem`, hsla( 0, 0, 0, .25 ) ],
+					[ 0, `0.5rem`, `0.5rem`, `-0.5rem`, hsla( 0, 0, 0, .25 ) ],
+				],
+			},
+			zIndex: 2,
+
+			'@media': {
+				'print': {
+					box: {
+						shadow: [[ 0, `1px`, 0, 0, hsla( 0, 0, 0, .25 ) ]],
+					},
+				},
+			},
+
 		},
 
 		Title: {
 
-			flex: {
-				grow: 1000,
-				shrink: 1,
-				basis: per(50),
-			},
-			padding: rem(.5),
+			minHeight: rem(2),
+			margin: 0,
+			padding: $mol_gap.text,
+			gap: $mol_gap.text,
 			wordBreak: 'normal',
-			cursor: 'default',
 			textShadow: '0 0',
 
-			':empty': {
-				display: 'none',
+			font: {
+				size: 'inherit',
+				weight: 'normal',
 			},
 	
+			flex: {
+				grow: 1,
+				shrink: 1,
+				basis: 'auto',
+			},
+
 		},
 
 		Tools: {
 			
-			flex: 'auto',
+			flex: {
+				basis: 'auto',
+				grow: 0,
+				shrink: 1,
+			},
 			display: 'flex',
 			justifyContent: 'flex-end',
+			alignItems: 'flex-start',
+			flexWrap: 'wrap',
 
-			':empty': {
-				display: 'none',
+			'@media': {
+				'print': {
+					display: 'none',
+				},
 			},
 
 		},
@@ -78,20 +104,44 @@ namespace $.$$ {
 				shrink: 1,
 				basis: per(100),
 			},
-			margin: 0,
 		},
-
+		
+		Body_content: {
+			padding: $mol_gap.block ,
+			minHeight: 0,
+			minWidth: 0,
+			flex: {
+				direction: 'column',
+				shrink: 1,
+				grow: 1,
+			},
+			justify: {
+				self: 'stretch',
+			},
+		},
+		
 		Foot: {
 			display: 'flex',
 			justifyContent: 'space-between',
 			flex: 'none',
 			margin: 0,
-			overflow: 'hidden',
 			background: {
-				color: $mol_theme.back ,
+				color: $mol_theme.card ,
 			},
-			boxShadow: `0 0 .5rem hsla(0,0%,0%,.25)` ,
+			border: {
+				radius: $mol_gap.round,
+			},
+			box: {
+				shadow: [
+					[ 0, `-0.5rem`, `0.5rem`, `-0.5rem`, hsla( 0, 0, 0, .25 ) ],
+					[ 0, `0.5rem`, `0.5rem`, `-0.5rem`, hsla( 0, 0, 0, .25 ) ],
+				],
+			},
 			zIndex: 1,
+			padding: $mol_gap.block ,
+			':empty': {
+				display: 'none',
+			},
 		},	
 
 	} )

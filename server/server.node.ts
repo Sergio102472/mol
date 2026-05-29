@@ -1,5 +1,10 @@
 namespace $ {
-	
+	export type $mol_server_middleware = (
+		req : typeof $node.express.request ,
+		res : typeof $node.express.response ,
+		next: (error?: unknown) => void
+	) => void | Promise<void>
+
 	export class $mol_server extends $mol_object {
 		
 		@ $mol_mem
@@ -11,60 +16,86 @@ namespace $ {
 			return express
 		}
 
+		internal_ip() {
+			const nets = $node.os.networkInterfaces()
+			const results = Object.create( null )
+
+			for( const name of Object.keys( nets ) ) {
+				for( const net of nets[ name ]! ) {
+					// Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+					// 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+					const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
+					if( net.family === familyV4Value && !net.internal ) {
+						if( !results[ name ] ) {
+							results[ name ] = []
+						}
+						results[ name ].push( net.address )
+					}
+				}
+			}
+			const internal = Object.values( results ).at( -1 ) as string[]
+			return internal?.[0] ?? '0.0.0.0'
+		}
+
 		@ $mol_mem
 		http() {
 
 			const server = $node.http.createServer( this.express() )
 
-			$node['portastic'].find(
-				{
-					min : this.port() ,
-					max : this.port() + 1000 ,
-					retrieve : 1
-				}
-			).then(
-				( ports : number[] ) => {
-					server.listen( ports[ 0 ] )
-					console.log( this.messageStart( ports[ 0 ] ) )
-				}
-			)
+			server.listen( this.port() )
+			
+			this.$.$mol_log3_done({
+				place: `${ this }.http` ,
+				message: `Started` ,
+				network: `http://${ this.internal_ip() }:${ this.port() }/`,
+				loopback: `http://localhost:${ this.port() }/`,
+			})
 
 			return server
 
 		}
 
+		connections = new Set< InstanceType<$node['ws']['WebSocket']> >()
+
 		@ $mol_mem
 		socket() {
 
-			const socket = new $node.ws.Server({
+			const socket = new $node.ws.WebSocketServer({
 				server : this.http() ,
-				perMessageDeflate: {
-					zlibDeflateOptions: {
-						chunkSize: 1024,
-						memLevel: 7,
-						level: 3
-					},
-					zlibInflateOptions: {
-						chunkSize: 10 * 1024
-					},
-				}
+				// perMessageDeflate: {
+				// 	zlibDeflateOptions: {
+				// 		chunkSize: 1024,
+				// 		memLevel: 7,
+				// 		level: 3
+				// 	},
+				// 	zlibInflateOptions: {
+				// 		chunkSize: 10 * 1024
+				// 	},
+				// }
 			})
 
-//			socket.on( 'connection' , line => {
-//				line.on( 'message' , message => line.send( message ) )
-//			} )
+			socket.on( 'connection' , line => {
+
+				this.connections.add( line )
+				
+				line.on( 'message' , ( message: any, isBinary: boolean )=> {
+
+					for( const other of this.connections ) {
+						if( line === other ) continue
+						other.send( message, { binary: isBinary } )
+					}
+					
+				} )
+
+			} )
 
 			return socket
 
 		}
 
-		messageStart( port : number ) {
-			const { green , greenBright } = $node.colorette
-			return green( `${ this } started at ${ greenBright( `http://127.0.0.1:${ port }/` ) }` )
-		}
-		
-		expressHandlers() : any[] {
+		expressHandlers() : readonly $mol_server_middleware[] {
 			return [
+				this.expressCors() ,
 				this.expressCompressor() ,
 				this.expressBodier() ,
 				this.expressGenerator() ,
@@ -75,7 +106,11 @@ namespace $ {
 		}
 		
 		expressCompressor() {
-			return $node['compression']() as unknown
+			return $node['compression']() as $mol_server_middleware
+		}
+		
+		expressCors() {
+			return $node.cors() as $mol_server_middleware
 		}
 		
 		expressBodier() {
@@ -89,13 +124,14 @@ namespace $ {
 		expressFiler() {
 			return $node.express.static(
 				$node.path.resolve( this.rootPublic() ) ,{
-					maxAge : this.cacheTime()
+					maxAge : this.cacheTime(),
+					dotfiles: 'allow'
 				}
 			)
 		}
 		
 		expressDirector() {
-			return $node['serve-index']( this.rootPublic() , { icons : true } ) as unknown
+			return $node['serve-index']( this.rootPublic() , { icons : true } )
 		}
 
 		expressIndex() {
@@ -107,7 +143,11 @@ namespace $ {
 		}
 		
 		expressGenerator() {
-			return ( req : any , res : any , next : () => void )=> next()
+			return (
+				req : typeof $node.express.request ,
+				res : typeof $node.express.response ,
+				next : () => void
+			)=> next()
 		}
 		
 		bodyLimit() {

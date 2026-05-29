@@ -50,6 +50,10 @@ namespace $.$$ {
 			return [ this.record( id.row[ id.row.length - 1 ] )[ id.col ] ]
 		}
 		
+		cell_content_text( id : { row : string[] , col : string } ) {
+			return this.cell_content( id ).map( val => typeof val === 'object' ? JSON.stringify( val ) : val )
+		}
+		
 		records() : any {
 			return []
 		}
@@ -133,11 +137,17 @@ namespace $.$$ {
 		}
 		
 		row_expanded_default( row_id : string[] ) {
-			return row_id.length < 3
+			return true
 		}
 		
 		cell_expanded( id : { row : string[] } , next? : boolean ) {
-			return this.row_expanded( id.row , next )
+			return this.row_expanded( id.row , next )!
+		}
+		
+		override sub() {
+			this.head_cells()
+			this.rows()
+			return super.sub()
 		}
 		
 	}

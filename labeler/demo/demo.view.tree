@@ -1,5 +1,5 @@
-$mol_labeler_demo $mol_demo_small
-	title @ \Labeled content of some types
+$mol_labeler_demo $mol_example_small
+	title \Labeled content of some types
 	sub /
 		<= Provider $mol_labeler
 			title \Provider
@@ -8,4 +8,11 @@ $mol_labeler_demo $mol_demo_small
 			title \User name
 			Content <= Name_control $mol_string
 				hint \Jack Sparrow
-				value?val <=> user_name?val \
+				value? <=> user_name? \
+	tags /
+		\label
+		\form
+		\field
+		\caption
+	aspects /
+		\Widget/Layout

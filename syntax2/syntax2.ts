@@ -1,6 +1,7 @@
 namespace $ {
 
-	export class $mol_syntax2< Lexems extends { [ name : string ] : RegExp } > {
+	/** Creates lexer by dictionary of lexems. Lexem that started first wins. Then lexem that declared earlier wins. Use regexp capture to take parts of token. */
+	export class $mol_syntax2< Lexems extends { [ name : string ] : RegExp } = {} > {
 		
 		constructor(
 			public lexems : Lexems
@@ -15,7 +16,7 @@ namespace $ {
 			}
 
 			const parts = '(' + this.rules.map( rule => rule.regExp.source ).join( ')|(' ) + ')'
-			this.regexp = RegExp( `([\\s\\S]*?)(?:(${ parts })|$(?![^]))` , 'gm' ) 
+			this.regexp = RegExp( `([\\s\\S]*?)(?:(${ parts })|$(?![^]))` , 'gmu' ) 
 			
 		}
 		
@@ -45,7 +46,7 @@ namespace $ {
 				if( start === end ) throw new Error( 'Empty token' )
 				
 				var prefix = found[ 1 ]
-				if( prefix ) handle( '' , prefix , [] , start )
+				if( prefix ) handle( '' , prefix , [ prefix ] , start )
 				
 				var suffix = found[ 2 ]
 				if( !suffix ) continue

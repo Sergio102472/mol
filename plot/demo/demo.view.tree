@@ -1,6 +1,7 @@
-$mol_plot_demo $mol_demo_large
-	title @ \Dynamic lightweight graphs
-	count?val 20
+$mol_plot_demo $mol_example_large
+	title \Dynamic lightweight graphs
+	count? 20
+	frequency 8
 	sub /
 		<= Plot $mol_plot_pane
 			graphs /
@@ -18,6 +19,15 @@ $mol_plot_demo $mol_demo_large
 				<= Output $mol_plot_bar
 					series_y <= output_series /
 				<= Voltage $mol_plot_ruler_vert
-					title <= Voltage_title @ \V
+					title <= Voltage_title \V
 				<= Time $mol_plot_ruler_hor
-					title <= Time_title @ \ms
+					title <= Time_title \ms
+	tags /
+		\visualization
+		\chart
+		\graph
+		\dashboard
+	aspects /
+		\Widget/Draw/Chart/Line
+		\Widget/Draw/Chart/Fill
+		\Widget/Draw/Chart/Dot

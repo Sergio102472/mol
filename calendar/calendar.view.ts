@@ -1,5 +1,8 @@
-namespace $.$mol {
-	
+namespace $.$$ {
+	/**
+	 * Draws all days of month as table.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_calendar_demo_holiday
+	 */
  	export class $mol_calendar extends $.$mol_calendar {
 
 		@ $mol_mem
@@ -47,17 +50,6 @@ namespace $.$mol {
 		}
 
 		@ $mol_mem
-		weeks_count() {
-
-			const interval = new $mol_time_interval({
-				start : this.day_draw_from() , 
-				end : this.day_last() ,
-			})
-			
-			return Math.ceil( interval.duration.count({ day : 7 }) )
-		}
-
-		@ $mol_mem
 		sub() {
 			return [
 				... super.sub() ,
@@ -99,15 +91,24 @@ namespace $.$mol {
 		day_holiday( day : string ) {
 			return this.weekend( new $mol_time_moment( day ).weekday )
 		}
+		
+		@ $mol_mem
+		today() {
+			return new $mol_time_moment()
+		}
+
+		@ $mol_mem_key
+		day_today( day : string ) {
+			return this.today().toString( 'YYYY-MM-DD' ) === day
+		}
 
 		@ $mol_mem_key
 		day_ghost( day : string ) {
 			return new $mol_time_moment( day ).toString( 'YYYY-MM' ) !== this.day_first().toString( 'YYYY-MM' )
 		}
 
-		@ $mol_mem_key
-		day_selected( day : string ) {
-			return new $mol_time_moment().toString( 'YYYY-MM-DD' ) === day
+		day_theme( day : string ) {
+			return this.day_selected( day ) ? '$mol_theme_current' : super.day_theme( day )
 		}
 
 	 }

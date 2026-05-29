@@ -1,5 +1,5 @@
-$mol_code_demo $mol_demo_small
-	title @ \Barcode scanner with various formats support
+$mol_code_demo $mol_example_small
+	title \Barcode scanner with various formats support
 	sub /
 		<= Qr $mol_code
 			format \QR_CODE
@@ -19,3 +19,10 @@ $mol_code_demo $mol_demo_small
 			format \CODE_39
 		<= Itf $mol_code
 			format \ITF
+	tags /
+		\qrcode
+		\barcode
+		\scan
+		\cordova
+	aspects /
+		\Widget/Control

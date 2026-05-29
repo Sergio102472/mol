@@ -3,68 +3,48 @@ namespace $.$$ {
 	const { rem } = $mol_style_unit
 	
 	$mol_style_define( $mol_list_demo_table , {
-
-		Row: {
-
-			padding: 0,
-			boxShadow: `0 0 0 .5px ${ $mol_theme.line }`,
-
-			'>': {
-				
-				$mol_view: {
-					margin: 0,
-				},
-
-			},
-
-		},
-
-		Id: {
-			textAlign: 'right',
-			padding: rem(.5),
-			flex: {
-				grow: 0,
-				shrink: 0,
-				basis: rem(3),
-			},
+		
+		flex: {
+			direction: 'column',
 		},
 		
-		Title: {
-			fontWeight: 'bolder',
+		Rows: {
 			flex: {
 				grow: 1,
-				shrink: 1,
-				basis: rem(20),
 			},
-			padding: rem(.5),
 		},
 		
-		Link: {
+		Row: {
+			boxShadow: `0 -1px 0 0 ${ $mol_theme.line }`,
+		},
+		
+		Title_labeler: {
 			flex: {
-				grow: 1000,
-				shrink: 1,
+				basis: rem(15),
+			},
+		},
+
+		Color_labeler: {
+			flex: {
 				basis: rem(10),
 			},
-			padding: [ rem(.5) , rem(1) ],
 		},
 
-		Editable: {
-			Title: {
-				verticalAlign: 'top',
+		Id_labeler: {
+			flex: {
+				basis: rem(5),
+			},
+			Label: {
+				padding: {
+					left: rem(2),
+				},
 			},
 		},
-
-		Priority: {
-			
-			flex: 'none',
-			padding: rem(.5),
-			
-			Option: {
-				padding: [ 0 , rem(.5) ],
-			},
-			
+		
+		Id: {
+			padding: $mol_gap.text,
 		},
-
+		
 	})
 
 }

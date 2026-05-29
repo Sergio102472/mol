@@ -1,16 +1,16 @@
 # $mol_touch
 
-Plugin for touch gestures
+Plugin for touch gestures.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_touch_demo)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_touch_demo)
 
 ## Usage example
 
 ```
 plugins /
 	<= Touch $mol_touch
-		zoom?val <=> zoom?val 1
-		pan?val <=> pan?val /
+		zoom? <=> zoom? 1
+		pan? <=> pan? /
 			0
 			0
 		swipe_right?event <=> open_menu?event null

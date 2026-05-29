@@ -2,13 +2,13 @@
 
 Allow user to select value from various options and displays current value.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_select)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_select_demo)
 
 ## Usage example
 
 ```
 <= Color $mol_select
-	value?val <=> color?val \
+	value? <=> color? \
 	dictionary <= colors *
 		red \Red
 		green \Green
@@ -46,11 +46,11 @@ If `option_label()` property not redefined by user, value is `dictionary()[key]`
 
 The property takes a string and show this string when `option_rows()` is empty.
 
-**`options_showed() : boolean`**
+**`showed() : boolean`**
 
 Show or Hide List of options.
 
-**`options_align() : string`**
+**`align() : string`**
 
 Property extends from `$mol_pop`. Equals `align()` property
 

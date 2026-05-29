@@ -1,6 +1,16 @@
 $mol_image $mol_view
 	dom_name \img
-	field *
+	attr *any
 		^
 		src <= uri \
-		alt <= title
+		title <= hint
+		alt <= title \
+		loading <= loading \lazy
+		decoding <= decoding \async
+		crossOrigin <= cors null
+		width <= natural_width 0
+		height <= natural_height 0
+	event *any
+		load? <=> load? null
+	minimal_width 16
+	minimal_height 16

@@ -13,19 +13,19 @@ namespace $ {
 				native.setItem( '' , '' )
 				native.removeItem( '' )
 				return this['native()'] = native
-			} catch( error ) {
+			} catch( error: any ) {
 				console.warn( error )
 			}
 
 			return this['native()'] = {
 				getItem( key : string ) {
-					return this[ ':' + key ]
+					return (this as any)[ ':' + key ]
 				} ,
 				setItem( key : string , value : string ) {
-					this[ ':' + key ] = value
+					(this as any)[ ':' + key ] = value
 				} ,
 				removeItem( key : string ) {
-					this[ ':' + key ] = void 0
+					(this as any)[ ':' + key ] = void 0
 				}
 			}
 

@@ -1,12 +1,14 @@
 $mol_chart_legend $mol_scroll
 	graphs /$mol_plot_graph
-	sub <= graph_legends /$mol_view
+	graphs_front /$mol_plot_graph
+	sub /
+		<= Gallery $mol_gallery items <= graph_legends /$mol_view
 	-
-	Graph_legend!id $mol_view
+	Graph_legend* $mol_view
 		sub /
-			<= Graph_sample_box!id $mol_view
+			<= Graph_sample_box* $mol_view
 				sub /
-					<= Graph_sample!id null
-			<= Graph_title!id $mol_view
+					<= Graph_sample* null
+			<= Graph_title* $mol_view
 				sub /
-					<= graph_title!id \
+					<= graph_title* \

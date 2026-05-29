@@ -9,9 +9,9 @@ namespace $ {
 			const val : any = fields[ key ]
 			
 			if( val === undefined ) continue
-			// if( el[ key ] === val ) continue
+			if( val === (el as any)[ key ] ) continue
 			
-			el[ key ] = val
+			(el as any)[ key ] = val
 		}
 	}
 

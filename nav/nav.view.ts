@@ -1,4 +1,9 @@
 namespace $.$$ {
+	
+	/**
+	 * Plugin which can navigate in list of items
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_nav_demo
+	 */
 	export class $mol_nav extends $.$mol_nav {
 		
 		event_key( event? : KeyboardEvent ) {
@@ -23,7 +28,7 @@ namespace $.$$ {
 			if( !event ) return event
 
 			const keys = this.keys_y()
-			if( keys.length < 2 ) return
+			if( keys.length < 1 ) return
 			
 			const index_y = this.index_y();
 			
@@ -41,7 +46,7 @@ namespace $.$$ {
 			if( !event ) return event
 
 			const keys = this.keys_y()
-			if( keys.length < 2 ) return
+			if( keys.length < 1 ) return
 			
 			const index_y = this.index_y();
 			
@@ -59,7 +64,7 @@ namespace $.$$ {
 			if( !event ) return event
 
 			const keys = this.keys_x()
-			if( keys.length < 2 ) return
+			if( keys.length < 1 ) return
 			
 			const index_x = this.index_x();
 			
@@ -77,7 +82,7 @@ namespace $.$$ {
 			if( !event ) return event
 
 			const keys = this.keys_x()
-			if( keys.length < 2 ) return
+			if( keys.length < 1 ) return
 			
 			const index_x = this.index_x();
 			

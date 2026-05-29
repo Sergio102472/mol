@@ -8,7 +8,7 @@ All globally defined entities are accessible from context:
 Promise === $.Promise === $.$$.Promise
 ```
 
-Ambient context can be overrided in instance:
+Ambient context can be overridden in instance:
 
 ```typescript
 class Foo extends $mol_object2 {
@@ -48,10 +48,14 @@ bar.Foo().logger.log( 'noop' )
 Global functions inherits context automatically:
 
 ```typescript
-function $my_hello( this : $mol_ambient_context , name : string ) {
+function $my_hello( this : $ , name : string ) {
 	this.console.log( `Hello, ${ name }!` )
 }
 
 // call in context
 $.$my_hello( 'Jin' )
 ```
+
+## Common pitfalls
+
+With static classes or singletones use [this.$.$mol_static.$my_class](../static/) or [this.$.$mol_one.$my_class](../one/)

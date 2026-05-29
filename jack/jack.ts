@@ -1,98 +1,94 @@
 namespace $ {
 
-	export const $mol_jack : $mol_tree_library = {
+	export const $mol_jack : $mol_tree2_belt<{}> = {
 
-		meta : {
+		no: ( input, belt )=> [],
 		
-			'' : ( input , jack )=> [ input.hack( jack ) ] ,
-			
-			list : ( input , jack )=> [ input.hack( jack ) ] ,
-			
-			tree : input => input.sub ,
-
-			pipe : input => [ input ] ,
-			
-			type : ( input , jack )=> input.hack( jack ).sub.map(
-				child => child.make({ value : child.type })
-			) ,
-			
-			head : ( input , jack )=> input.hack( jack ).sub.slice( 0 , 1 ) ,
-			
-			headless : ( input , jack )=> input.hack( jack ).sub.slice( 1 ) ,
-			
-			reversed : ( input , jack )=> input.hack( jack ).sub.slice().reverse() ,
-
-			make : ( input , jack )=> {
-
-				let type , value , sub
-
-				for( const kid of input.sub ) {
-
-					switch( kid.type ) {
-						case 'type' : type = kid.hack( jack ).value ; break
-						case 'value' : value = kid.hack( jack ).value ; break
-						case 'sub' : sub = kid.hack( jack ).sub ; break
-						default : return $mol_fail( kid.error( `Wrong node type ${ kid.type }` ) )
-					}
-
-				}
-
-				return [ input.make({ type , value , sub }) ]
-
-			} ,
-			
-			test : ( input , jack )=> {
-
-				const cases = input.select( 'case' ).sub
-				const results = cases.map( Case => Case.hack( jack ) )
+		list: ( input, belt )=> input.hack( belt ),
 		
-				try {
-					$mol_assert_equal( ... results.map( String ) )
-				} catch( error ) {
-					return $mol_fail_hidden( input.error( error.message ) )
-				}
+		tree: input => input.kids,
+
+		type: ( input, belt )=> input.hack( belt ).map( kid => kid.data( kid.type ) ),
 		
-				return [ input ]
-
-			} ,
-
-			jack : ( input , ambient )=> {
-				
-				const lets : $mol_tree_context = {
-					... ambient ,
-					ambient : ( input , jack )=> {
-						return Object.keys( jack ).map( type => input.clone({
-							type ,
-							sub : [ input.clone({
-								type : 'ambient' ,
-								sub : [] ,
-							}) ] ,
-						}) )
-					} ,
-				}
-				
-				const defs : $mol_tree_context = {}
-
-				for( const def of input.select( 'let' , '' ).hack( lets ).sub ) {
-					
-					defs[ def.type ] = ( input , ctx )=> {
+		kids: ( input, belt )=> ( [] as $mol_tree2[] ).concat( ... input.hack( belt ).map( kid => kid.kids ) ),
+		
+		head: ( input, belt )=> input.hack( belt ).slice( 0, 1 ),
+		
+		headless: ( input, belt )=> input.hack( belt ).slice( 1 ),
+		
+		reversed: ( input, belt )=> input.hack( belt ).reverse(),
+		
+		count: ( input, belt )=> [ input.struct( input.hack( belt ).length.toString() ) ],
+		
+		struct: ( input, belt )=> {
+			const res = input.hack( belt )
+			return [ res[0].struct( res[0].value, res.slice( 1 ) ) ]
+		},
+		
+		data: ( input, belt )=> {
+			const res = input.hack( belt )
+			return [ res[0].data( res[0].value, res.slice( 1 ) ) ]
+		},
+		
+		jack: ( input, belt )=> input.hack( Object.create( belt ) ),
+		
+		hack: ( input, belt )=> {
+			
+			const def = input.kids[0]
+			
+			if( Reflect.getOwnPropertyDescriptor( belt, def.type ) ) {
+				$mol_fail( def.error( 'Already hacked' ) )
+			}
+			
+			belt[ def.type ] = ( arg, belt_inner, context )=> {
+				return def.hack(
+					Object.create( Object.assign( Object.create( belt ), {
 						
-						const exec : $mol_tree_context = {
-							... defs ,
-							from : ()=> input.hack( ctx ).sub ,
-							ambient : ( am )=> ambient[ am.sub[0] ? am.sub[0].type : def.type ]( input , exec ) ,
-						}
+						from: ( input: $mol_tree2, b: $mol_tree2_belt<{}>, c: {} )=> {
+							return arg.hack( Object.assign( Object.create( belt_inner ), b ), c )
+						},
 						
-						return def.hack( exec ).sub
-					}
+						clone: ( input: $mol_tree2, b: $mol_tree2_belt<{}>, c: {} )=> [
+							arg.clone( input.hack( b, c ) ),
+						],
+						
+					} ) ),
+					{ ... context, span: arg.span },
+				)
+			}
+			
+			return []
+		},
+		
+		test: ( input, belt )=> {
 
-				}
-				
-				return input.select( 'out' , '' ).hack( ambient ).hack( defs ).sub
-			} ,
+			const cases = input.select( 'case' ).kids
+			const results = cases.map( Case => Case.hack( belt ) )
 
-		} ,
+			$mol_assert_equal( ... results.map( String ) as [ string, string, ...string[] ] )
 
+			return [ input ]
+
+		},
+
+		'+math': ( input, belt, context )=> input.hack( Object.assign( Object.create( belt ), {
+			
+			... belt,
+			
+			sum: ( input: $mol_tree2, belt: $mol_tree2_belt<{}> )=> [
+				input.struct(
+					input.hack( belt, context )
+					.reduce( ( s, k )=> s + Number( k.type ) , 0 )
+					.toString()
+				)
+			],
+			
+		} ), context ),
+
+	}
+	
+	export function $mol_jack_transform( code: $mol_tree2 ) {
+		return code.list( code.hack( Object.create( $mol_jack ) ) )
 	}
 
 }

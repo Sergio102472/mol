@@ -1,27 +1,26 @@
 namespace $.$$ {
+
+	/**
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_frame_demo
+	 */
 	export class $mol_frame extends $.$mol_frame {
-
-		dom_node! : ( next? : HTMLIFrameElement )=> HTMLIFrameElement
 		
-		@$mol_mem
 		window() {
-
-			const node = this.dom_node()
-			
-			this.uri();
-			
-			return $mol_fiber_sync(() => new Promise((done, fail) => {
-				node.onload = () => done( node.contentWindow )
-				node.onerror = ( event : Event | string ) => {
-					fail( typeof event === 'string' ? new Error( event ) : ( event as ErrorEvent ).error || event )
-				}
-			}))()
-			
+			// if( this.html() ) return ( this.dom_node() as HTMLIFrameElement ).contentWindow!
+			return super.window()
 		}
 
-		render() {
-			this.window();
-			return super.render();
+		allow() {
+			return [
+				... this.fullscreen() ? [ 'fullscreen' ] : [] ,
+				... this.accelerometer() ? [ 'accelerometer' ] : [] ,
+				... this.autoplay() ? [ 'autoplay' ] : [] ,
+				... this.encription() ? [ 'encrypted-media' ] : [] ,
+				... this.gyroscope() ? [ 'gyroscope' ] : [] ,
+				... this.pip() ? [ 'picture-in-picture' ] : [] ,
+				... this.clipboard_read() ? [ `clipboard-read ${ this.uri() }` ] : [],
+				... this.clipboard_write() ? [ `clipboard-write ${ this.uri() }` ] : [],
+			].join('; ')
 		}
 		
 	}

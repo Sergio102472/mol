@@ -6,18 +6,21 @@ namespace $ {
 
 			const store = new WeakMap< This , Value >()
 
-			return function( this : This , next? : Value ) {
+			const fun = function( this : This , next? : Value ) {
 
-				if( next === undefined && store.has( this ) ) return store.get( this )
+				if( next === undefined && store.has( this ?? fun ) ) return store.get( this ?? fun )
 				
 				const val = task.call( this , next ) ?? next
 				
-				store.set( this , val! )
+				store.set( this ?? fun , val! )
 				
 				return val
 
 			}
 
+			Reflect.defineProperty( fun , 'name' , { value : task.name + ' ' } )
+
+			return fun
 		}
 		
 	}

@@ -2,7 +2,7 @@
 
 The component for creating page layout.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_page)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_page_demo)
 
 ## Usage examples
 

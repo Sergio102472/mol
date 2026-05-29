@@ -2,7 +2,7 @@
 
 Draws all days of month as table.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_calendar)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_calendar_demo)
 
 ## Usage example
 ```
@@ -18,7 +18,7 @@ Displayed month as moment.
 
 **`month_string() : string`**
 
-Displayed month as string in iso format like `2017-01`.
+Displayed month as string in ISO format like `2017-01`.
 
 ## Days modificators
 

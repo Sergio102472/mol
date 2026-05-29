@@ -1,7 +1,5 @@
 namespace $ {
 
-	const log = $mol_fiber.func( console.log )
-	
 	export class $mol_orient_wrapper< Api > extends $mol_object2 {
 
 		api() : Api {
@@ -49,12 +47,12 @@ namespace $ {
 
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		db_list() : string[] {
 			return $mol_fiber_sync( ()=> this.api().listDatabases( this.credentials() ) )()
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		db_add(
 			name : string ,
 			type : "graph" | "document" = 'document' ,
@@ -64,7 +62,7 @@ namespace $ {
 			return this
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		db_exists(
 			name : string ,
 			type : "graph" | "document" = 'document' ,
@@ -73,7 +71,7 @@ namespace $ {
 			return $mol_fiber_sync( ()=> this.api().existsDatabase({ name , type , storage }) )()
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		db_ensure(
 			name : string ,
 			type : "graph" | "document" = 'document' ,
@@ -95,7 +93,7 @@ namespace $ {
 			return $mol_fail( `${ this }.client() isn't defined` )
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		session() {
 			
 			const api = $mol_fiber_sync( ()=> this.api().acquire() )()
@@ -118,12 +116,12 @@ namespace $ {
 			return this.pool().client()
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		destructor() {
 			this.api().close()
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		exec( build : ( api : $lib_orientjs['ODatabaseSession'] )=> $lib_orientjs['OResult'] ) {
 			const api = this.api()
 			const res = $mol_fiber_sync( ()=> build( api ).all() )() as $lib_orientjs['ORecord'][]
@@ -132,10 +130,14 @@ namespace $ {
 			} ) )
 		}
 
+		@ $mol_action
 		query( query : string ) {
-			const res = this.exec( api => api.query( query ) )
-			console.log( 'QUERY:' , query )
-			return res
+			$mol_fiber.run( ()=> this.$.$mol_log3_rise({
+				place: this ,
+				message: 'Query',
+				query ,
+			}) )
+			return this.exec( api => api.query( query ) )
 		}
 
 	}

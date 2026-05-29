@@ -2,7 +2,7 @@
 
 Scrolling pane.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_scroll)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_scroll_demo)
 
 ## Usage example
 

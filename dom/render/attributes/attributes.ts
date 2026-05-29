@@ -9,7 +9,11 @@ namespace $ {
 
 			let val = attrs[ name ] as any
 
-			if( val === null || val === false ) {
+			if( val === undefined ) {
+				
+				continue
+				
+			} else if( val === null || val === false ) {
 
 				if( !el.hasAttribute( name ) ) continue
 				

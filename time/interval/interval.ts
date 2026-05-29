@@ -6,6 +6,12 @@ namespace $ {
 		duration? : $mol_time_duration_config
 	}
 
+	/**
+	 * Small, simple, powerful, and fast TypeScript/JavaScript library for proper date/time/duration/interval arithmetic.
+	 *
+	 * Immutable iso8601 time interval representation.
+	 * @see http://localhost:9080/mol/app/docs/-/test.html#!demo=mol_time_demo
+	 */
 	export class $mol_time_interval extends $mol_time_base {
 
 		constructor( config : $mol_time_interval_config ) {
@@ -71,6 +77,10 @@ namespace $ {
 			return ( this._start || this._duration || '' ).toString() + '/' + ( this._end || this._duration || '' ).toString()
 		}
 
+		[ Symbol.toPrimitive ]( mode: 'default' | 'number' | 'string' ) {
+			return this.toString()
+		}
+		
 	}
 
 }

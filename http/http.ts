@@ -2,6 +2,7 @@ namespace $ {
 
 	console.warn( '$mol_http is deprecated. Use $mol_fetch instead.' )
 	
+	/** Reactive http request implementation. */
 	export class $mol_http extends $mol_object {
 		
 		static resource( uri : string ) {
@@ -60,9 +61,9 @@ namespace $ {
 		}
 		
 		@ $mol_mem
-		json< Content >( next? : Content , force? : $mol_mem_force ) : Content {
+		json< Content >( next? : Content , force? : $mol_mem_force ) {
 			const next2 = next && JSON.stringify( next , null , '\t' )
-			return this.response( next2 , force ).json()
+			return this.response( next2 , force ).json() as Content
 		}
 		
 	}

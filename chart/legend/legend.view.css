@@ -2,8 +2,6 @@
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
-	padding: .5rem;
-	margin: .5rem;
 	flex: 0 1 auto;
 }
 
@@ -16,6 +14,7 @@
 
 [mol_chart_legend_graph_title] {
 	margin: 0 .25rem;
+	flex: 1 1 auto;
 }
 
 [mol_chart_legend_graph_sample_box] {

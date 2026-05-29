@@ -1,5 +1,11 @@
-$mol_frame_demo $mol_demo_large
-	title @ \Another page inside that
+$mol_frame_demo $mol_example_large
 	sub /
 		<= Frame $mol_frame
-			uri \https://mol.js.org/
+			title \Another page inside that
+			uri \https://mol.hyoo.ru/
+	tags /
+		\iframe
+		\container
+	aspects /
+		\Widget/Integration
+		\Widget/Island

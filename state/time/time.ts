@@ -1,16 +1,22 @@
 namespace $ {
 	
+	/** State of time moment */
 	export class $mol_state_time extends $mol_object {
 		
 		@ $mol_mem_key
-		static now( precision = 0 , next? : number ) {
+		static task( precision: number, reset?: null ): $mol_after_timeout | $mol_after_frame {
 			
-			if( precision > 0 ) {
-				new $mol_after_timeout( precision , $mol_atom2.current!.fresh )
+			if( precision ) {
+				return new $mol_after_timeout( precision, ()=> this.task( precision, null ) )
 			} else {
-				new $mol_after_frame( $mol_atom2.current!.fresh )
+				return new $mol_after_frame( ()=> this.task( precision, null ) )
 			}
 		
+		}
+		
+		@ $mol_mem_key
+		static now( precision: number ) {
+			this.task( precision )
 			return Date.now()
 		}
 		

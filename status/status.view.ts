@@ -4,11 +4,10 @@ namespace $.$$ {
 		
 		message() {
 			try {
-				let status = this.status()
-				if( status ) status.valueOf()
-				return null
-			} catch( error ) {
+				return this.status() ?? null
+			} catch( error: any ) {
 				if( error instanceof Promise ) $mol_fail_hidden( error )
+				$mol_fail_log( error )
 				return error.message
 			}
 		}

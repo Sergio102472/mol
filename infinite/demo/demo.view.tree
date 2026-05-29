@@ -1,11 +1,22 @@
-$mol_infinite_demo $mol_demo_large
-	title @ \Infinite list demo
+$mol_infinite_demo $mol_example_large
+	title \Infinite list demo
 	chunk_size 20
 	sub /
 		<= Scroll $mol_scroll sub /
 			<= List $mol_infinite
-				after!anchor_id <= after!anchor_id /
-				Row!id <= Item!id $mol_row
-					minimal_height 40
+				before* <= before* /
+				after* <= after* /
+				Row* <= Item* $mol_row
 					sub /
-						<= item_title!id \
+						<= Photo* $mol_avatar id <= id* \
+						<= Info* $mol_list rows /
+							<= Name* $mol_paragraph title <= name* \
+							<= City* $mol_paragraph title <= city* \
+	tags /
+		\avatar
+		\infinite
+		\scroll
+		\virtual
+		\container
+	aspects /
+		\Widget/Layout

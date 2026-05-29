@@ -15,13 +15,16 @@ namespace $.$$ {
 				graph.viewport = ()=> this.viewport()
 				graph.cursor_position = ()=> this.cursor_position()
 				graph.gap = ()=> this.gap()
+				graph.title = ()=> this.title()
+				graph.repos_x = val => this.repos_x( val )
+				graph.repos_y = val => this.repos_y( val )
 			}
 			return graphs
 		}
 		
 		@ $mol_mem
 		dimensions() {
-			const graphs = this.graphs()
+			const graphs = this.graphs_enriched()
 			let next = new this.$.$mol_vector_2d(
 				$mol_vector_range_full.inversed,
 				$mol_vector_range_full.inversed

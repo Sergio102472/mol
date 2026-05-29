@@ -1,9 +1,5 @@
 [mol_app_questions_menu] {
-	flex: 1 1 400px;
-}
-
-[mol_app_questions_menu_links] {
-	padding: .5rem;
+	flex: 0 0 40rem;
 }
 
 [mol_app_questions_question_link] {
@@ -27,13 +23,12 @@
 	flex: 1000 1 auto;
 }
 
-[mol_app_questions_placeholder] ,
 [mol_app_questions_details] {
-	flex: 1000 1 600px;
+	flex: 1 0 60rem;
 }
 
-[mol_app_questions_details_descr] {
-	margin: 1rem;
+[mol_app_questions_details_body] {
+	padding: 0;
 }
 
 [mol_app_questions_answer] {

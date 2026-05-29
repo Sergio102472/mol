@@ -1,4 +1,14 @@
-$mol_frame $mol_view
-	dom_name \iframe
+$mol_frame $mol_embed_native
 	attr *
-		src <= uri \
+		tabindex <= tabindex
+		allow <= allow \
+		src <= uri
+		srcdoc <= html null
+	fullscreen true
+	accelerometer true
+	autoplay true
+	encription true
+	gyroscope true
+	pip true
+	clipboard_read true
+	clipboard_write true

@@ -1,21 +1,20 @@
 namespace $.$$ {
+
+	/**
+	 * Allow user to select value from various options and displays current value.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_select_demo_colors
+	 */
 	export class $mol_select extends $.$mol_select {
 		
 		@ $mol_mem
 		filter_pattern( next? : string ) {
-			if( !this.focused() ) return ''
+			this.focused()
 			
 			return next || ''
 		}
 
 		open() {
-			this.options_showed( true )
-		}
-		
-		@ $mol_mem
-		options_showed( next = false ) {
-			this.focused()
-			return next
+			this.showed( true )
 		}
 		
 		@ $mol_mem
@@ -36,15 +35,11 @@ namespace $.$$ {
 		
 		option_label( id : string ) {
 			const value = this.dictionary()[ id ]
-			return value == null ? id : value
+			return (value == null ? id : value) || this.option_label_default()
 		}
 		
 		option_rows() {
-			if( this.options_filtered().length === 0 ) return [ this.No_options() ]
-			
-			let options = this.options_filtered().map( ( option : string ) => this.Option_row( option ) )
-			
-			return options
+			return this.options_filtered().map( ( option : string ) => this.Option_row( option ) )
 		}
 		
 		@ $mol_mem
@@ -54,10 +49,10 @@ namespace $.$$ {
 					if( comp && comp.focused() ) return comp
 				}
 				
-				return this.Filter()
+				return null
 			}
 			
-			if( this.options_showed() ) {
+			if( this.showed() ) {
 				component.focused( true )
 			}
 			
@@ -66,27 +61,30 @@ namespace $.$$ {
 
 		event_select( id : string , event? : MouseEvent ) {
 			this.value( id )
-			this.focused( false )
+			this.showed( false )
+			event?.preventDefault()
 		}
 		
 		nav_components() {
-			return [ this.Filter() , ... this.option_rows() ]
+			if( this.options().length > 1 && this.Filter() ) {
+				return [ this.Filter() , ... this.option_rows() ]
+			} else {
+				return this.option_rows()
+			}
 		}
 
-		option_content_current() {
-			return this.option_content( this.value() )
-		}
-		
 		trigger_content() {
-			return ( !this.value() && this.Filter() )
-				? [ this.Filter() ]
-				: [ ... this.option_content_current() , this.Trigger_icon() ]
+			return [
+				... this.option_content( this.value() ),
+				... this.trigger_enabled() ? [ this.Trigger_icon() ] : [],
+			] as readonly $mol_view_content[]
 		}
 		
 		menu_content() {
-			return ( this.value() && this.Filter() )
-				? [ this.Filter() , ... this.option_rows() ]
-				: this.option_rows()
+			return [
+				... this.option_rows(),
+				... ( this.options_filtered().length === 0 ) ? [ this.No_options() ] : []
+			]
 		}
 		
 	}

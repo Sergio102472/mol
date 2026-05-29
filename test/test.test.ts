@@ -1,23 +1,21 @@
 namespace $ {
 
-	export namespace $$ { let $ }
-	
-	export function $mol_test( set : { [ name : string ] : string | ( ( context : $mol_ambient_context )=> void ) } ) {
+	export function $mol_test( set : { [ name : string ] : string | ( ( context : $ )=> void ) } ) {
 		
 		for( let name in set ) {
 
 			const code = set[ name ]
 			const test = ( typeof code === 'string' ) ? new Function( '' , code ) as ()=> void : code
 			
-			$mol_test_all.push( $mol_log_group( name , test ) )
+			$mol_test_all.push( test )
 		}
 
 		$mol_test_schedule()
 	}
 
-	export let $mol_test_mocks = [] as Array< ( context : $mol_ambient_context )=> void >
+	export let $mol_test_mocks = [] as Array< ( context : $ )=> void >
 
-	export const $mol_test_all = [] as Array< ( context : $mol_ambient_context )=> void >
+	export const $mol_test_all = [] as Array< ( context : $ )=> any >
 
 	export async function $mol_test_run() {
 
@@ -26,10 +24,22 @@ namespace $ {
 			let context = Object.create( $$ )
 			for( let mock of $mol_test_mocks ) await mock( context )
 			
-			await test( context )
+			const res = test( context )
+			if( $mol_promise_like( res ) ) {
+				await new Promise( ( done, fail )=> {
+					res.then( done, fail )
+					setTimeout( ()=> fail( new Error( 'Test timeout: ' + test.name ) ), 1000 )
+				} )
+			}
+			
 		}
 		
-		console.info( '$mol_test completed' , $mol_test_all.length )
+		$$.$mol_log3_done({
+			place: '$mol_test',
+			message: 'All tests passed',
+			count: $mol_test_all.length,
+		})
+		
 	}
 	
 	let scheduled = false
@@ -38,13 +48,16 @@ namespace $ {
 		if( scheduled ) return
 		scheduled = true
 
-		setTimeout( $mol_log_group( '$mol_test' , ()=> {
+		setTimeout( async ()=> {
+			
 			scheduled = false
- 			$mol_test_run()
-		} ) , 0 )
+ 			
+			await $mol_test_run()
+			$$.$mol_test_complete()
+			
+		} , 1000 )
 		
 	}
-
 
 	$mol_test_mocks.push( context => {
 		let seed = 0
@@ -52,10 +65,10 @@ namespace $ {
 		context.Math = Object.create( Math )
 		context.Math.random = ()=> Math.sin( seed++ )
 
-		const forbidden = [ 'XMLHttpRequest' , 'fetch' ]
+		const forbidden = [ 'XMLHttpRequest' , 'fetch' ] as const
 
 		for( let api of forbidden ) {
-			context[ api ] = new Proxy( function(){} , {
+			context[ api ] = new Proxy( function(){} as any , {
 				get() {
 					$mol_fail_hidden( new Error( `${ api } is forbidden in tests` ) )
 				} ,
@@ -77,7 +90,7 @@ namespace $ {
 		'forbidden XMLHttpRequest'( $ ) {
 			try {
 				console.assert( void new $.XMLHttpRequest )
-			} catch( error ) {
+			} catch( error: any ) {
 				console.assert( error.message === 'XMLHttpRequest is forbidden in tests' )
 			}
 		} ,
@@ -85,7 +98,7 @@ namespace $ {
 		'forbidden fetch'( $ ) {
 			try {
 				console.assert( void $.fetch('') )
-			} catch( error ) {
+			} catch( error: any ) {
 				console.assert( error.message === 'fetch is forbidden in tests' )
 			}
 		} ,

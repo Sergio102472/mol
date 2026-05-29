@@ -23,13 +23,13 @@ namespace $ {
 				type Args = ConstructorParameters< Class >
 				type Result = InstanceType< Class >
 
-				const construct = ( target : new ( ... args : Args )=> Result , args : Args )=> new Class( ... args )
+				const construct = ( target : Class , args : Args )=> new Class( ... args )
 
-				const handler = {
+				const handler: ProxyHandler<Class> = {
 					construct : this.func( construct )
-				}
+				} 
 
-				handler[ Symbol.toStringTag ] = Class.name + '#'
+				;(handler as any)[ Symbol.toStringTag ] = Class.name + '#'
 
 				return new Proxy( Class , handler )
 				
@@ -39,15 +39,10 @@ namespace $ {
 
 		static get method() {
 			
-			return <
-				Host ,
-				Field extends keyof Host ,
-				Args extends any[] ,
-				Result ,
-			>(
-				obj : Host ,
-				name : Field ,
-				descr : TypedPropertyDescriptor< ( this : Host , ... args : Args )=> Result >
+			return (
+				obj : object,
+				name : PropertyKey,
+				descr = Reflect.getOwnPropertyDescriptor( obj, name )!,
 			) => {
 				descr.value = this.func( descr.value! )
 				return descr
@@ -58,14 +53,14 @@ namespace $ {
 		static get field() {
 			
 			return <
-				Host ,
+				Host extends object ,
 				Field extends keyof Host ,
 				Args extends any[] ,
 				Result ,
 			>(
 				obj : Host ,
 				name : Field ,
-				descr : TypedPropertyDescriptor< Result >
+				descr = Reflect.getOwnPropertyDescriptor( obj, name )! as  TypedPropertyDescriptor< Result >
 			) => {
 				descr.get = descr.set = this.func( descr.get! )
 				return descr

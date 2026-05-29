@@ -1,6 +1,8 @@
 namespace $ {
 	$mol_style_define( $mol_frame , {
-		border: 'none',
-		flex: 'auto',
+		border: {
+			style: 'none',
+		},
+		maxHeight: $mol_style_unit.vh(100),
 	} )
 }

@@ -1,11 +1,11 @@
 # $mol_jsx_attach
 
-Defines `$mol_jsx_document` for inner JSX instructions. DOM nodes are reusing from document by guids.
+Defines `$mol_jsx_document` for inner JSX instructions. DOM nodes are reusing from document by GUIDs.
 
 ## Usage example
 
 ```tsx
-/** @jsx $mol_jsx_make */
+/** @jsx $mol_jsx */
 
 const $my_message = ()=> <div>Hello!</div>
 

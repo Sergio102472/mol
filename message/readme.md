@@ -2,7 +2,7 @@
 
 Draws generic user message
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_message_demo)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_message_demo)
 
 ## Usage example
 ```
@@ -38,4 +38,4 @@ Uri for navigation on click to avatar.
 
 **`text() : string`**
 
-Message body that interpeted as markdown.
+Message body that interpreted as markdown.

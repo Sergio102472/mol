@@ -2,21 +2,17 @@ namespace $ {
 
 	export class $mol_model< Raw extends Object > extends $mol_object {
 
-		@ $mol_mem_key
+		@( $mol_mem_key as any )
 		static item<
 			Instance extends $mol_model<{}>,
 		>(
 			this : { new() : Instance },
 			uri : string,
 		) : Instance {
+			$mol_wire_solid()
 			const instance = new this
 			instance.uri = ()=> uri
 			return instance
-		}
-
-		@ $mol_mem
-		static cache< Raw extends Object >() {
-			return {}
 		}
 
 		uri() {
@@ -32,60 +28,55 @@ namespace $ {
 		}
 
 		@ $mol_mem
-		json( next? : Partial< Raw > , force? : $mol_mem_force ) {
+		json( next? : null | Partial< Raw > ): Raw {
 			
-			let json : Raw | undefined
-			let uri = this.uri()			
-			const cache = $mol_model.cache< Raw >()
-
-			if( !next && !force ) {
-				json = cache[ uri ]
-				if( json != undefined ) return json
-			}
-
-			cache[ uri ] = undefined
-
-			json = $mol_fetch.json( this.resource_url() , {
+			const prev = this.json_update()
+			if( next ) return this.json_update({ ... prev, ... next })
+			if( next === undefined && prev !== undefined ) return prev
+			
+			let json = $mol_fetch.json( this.resource_url() , {
 				method : next ? this.method_put() : 'GET' ,
 				body : next && JSON.stringify( next ) ,
-				headers : {
+				headers : { 
 					'content-type' : 'application/json',
 				},
 			} ) as Raw
-
+			
 			return this.json_update( json )
 
 		}
 
-		json_update( patch : Partial< Raw > ) : Raw {
-			const uri = this.uri()
-			const cache =  $mol_model.cache< Raw >()
-
-			return cache[ uri ] = $mol_merge_dict( cache[ uri ] || {} as Raw , patch )
+		@ $mol_mem
+		json_update( patch? : Partial< Raw > ): Raw {
+			
+			if( patch ) this.json_update()
+			else $mol_wire_solid()
+			
+			return patch as any
 		}
 
 	}
 
-	export function $mol_model_prop< Value , Json >(
-		field : string ,
-		make : ( json : Json )=> Value ,
-	) {
-		return < Raw extends Object , Host extends $mol_model< Raw > >(
-			host : Host ,
-			prop : string ,
-			descr : TypedPropertyDescriptor< ( next?: Value )=> Value >
-		)=> {
-			if( field ) field = prop
+	// export function $mol_model_prop< Value , Json >(
+	// 	field : keyof Json ,
+	// 	make : ( json : Json )=> Value ,
+	// ) {
+	// 	return < Raw extends Object , Host extends $mol_model< Raw > >(
+	// 		host : Host ,
+	// 		prop : keyof Json ,
+	// 		descr : TypedPropertyDescriptor< ( next?: Value )=> Value >
+	// 	)=> {
+	// 		if( field ) field = prop
 
-			const value = descr.value!
+	// 		const value = descr.value!
 
-			descr.value = function( this : Host , next? : Value ) {
-				const val = this.json( next === undefined ? undefined : { ... this.json() , [ field ] : next } )[ field ]
-				if( val === undefined ) return value.call( this )
-				if( make ) return make( val )
-				return val
-			}
-		}
-	}
+	// 		descr.value = function( this : Host , next? : Value ) {
+	// 			const val = this.json( next === undefined ? undefined : { ... this.json() , [ field ] : next } )[ field ]
+	// 			if( val === undefined ) return value.call( this )
+	// 			if( make ) return make( val )
+	// 			return val
+	// 		}
+	// 	}
+	// }
 
 }

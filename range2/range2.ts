@@ -1,11 +1,19 @@
 namespace $ {
 
+	/** Lazy computed lists with native Array interface. $mol_range2_array is mutable but all derived ranges are immutable. */
 	export function $mol_range2< Item = number >(
-		item : ( index : number )=> Item = index => index as any ,
+		item: Item[] | ( ( index : number )=> Item ) = index => index as any ,
 		size = ()=> Number.POSITIVE_INFINITY ,
-	) : Item[] {
+	): Item[] {
+		
+		const source = typeof item === 'function' ? new $mol_range2_array< Item >() : item
+		
+		if( typeof item !== 'function' ) {
+			item = index => source[ index ]
+			size = ()=> source.length
+		}
 
-		return new Proxy( new $mol_range2_array< Item >() , {
+		return new Proxy( source , {
 
 			get( target , field ) {
 
@@ -13,14 +21,16 @@ namespace $ {
 					if( field === 'length' ) return size()
 					
 					const index = Number( field )
-					if( index === Math.trunc( index ) ) return item( index )
+					if( index < 0 ) return undefined
+					if( index >= size() ) return undefined
+					if( index === Math.trunc( index ) ) return ( item as any )( index )
 				}
 
-				return target[ field ]
+				return $mol_range2_array.prototype[ field as any ]
 			} ,
 
 			set( target , field ) {
-				return $mol_fail( new TypeError( 'Lazy range is read only' ) )
+				return $mol_fail( new TypeError( `Lazy range is read only (trying to set field ${ JSON.stringify( field ) })`  ) )
 			} ,
 
 			ownKeys( target ) {
@@ -51,8 +61,9 @@ namespace $ {
 	}
 
 	export class $mol_range2_array< Item > extends Array< Item > {
-
-		concat( ... tail : this[] ) : Item[] {
+		
+		// Lazy
+		concat( ... tail : Item[][] ) : Item[] {
 			if( tail.length === 0 ) return this as any
 
 			if( tail.length > 1 ) {
@@ -67,18 +78,31 @@ namespace $ {
 			)
 		}
 
+		// Lazy
 		filter< Context > (
 			check : ( val : Item , index : number , list : Item[] )=> boolean ,
 			context? : Context ,
 		) {
-			const filtered = new $mol_range2_array< Item >() as any as Item[]
-			for( let index = 0 ; index < this.length ; ++ index ) {
-				const item = this[ index ]
-				if( check.call( context , item , index , this ) ) filtered.push( item )
-			}
-			return filtered
+			
+			const filtered = [] as Item[]
+			let cursor = -1
+			
+			return $mol_range2(
+				index => {
+					
+					while( cursor < this.length && index >= filtered.length - 1 ) {
+						const val = this[ ++ cursor ]
+						if( check( val, cursor, this ) ) filtered.push( val )
+					}
+					
+					return filtered[ index ]
+				},
+				()=> cursor < this.length ? Number.POSITIVE_INFINITY : filtered.length,
+			)
+			
 		}
 
+		// Diligent
 		forEach< Context > (
 			proceed : ( this : Context , val : Item , index : number , list : Item[] )=> void ,
 			context? : Context,
@@ -86,6 +110,7 @@ namespace $ {
 			for( let [ key , value ] of this.entries() ) proceed.call( context as Context , value , key , this )
 		}
 
+		// Lazy
 		map< Item_out , Context > (
 			proceed : ( this : Context , val : Item , index : number , list : Item[] )=> Item_out ,
 			context? : Context ,
@@ -96,6 +121,7 @@ namespace $ {
 			)
 		}
 
+		// Diligent
 		reduce< Result > (
 			merge : ( result : Result , val : Item , index : number , list : Item[] )=> Result ,
 			result? : Result ,
@@ -113,13 +139,23 @@ namespace $ {
 			return result
 		}
 
-		slice( from = 0 , to = this.length ) : Item[] {
+		// Lazy
+		toReversed(): Item[] {
+			return $mol_range2(
+				index => this[ this.length - 1 - index ] ,
+				()=> this.length ,
+			)
+		}
+
+		// Lazy
+		slice( from = 0 , to = this.length ) {
 			return $mol_range2(
 				index => this[ from + index ] ,
 				()=> Math.min( to , this.length ) - from ,
 			)
 		}
 
+		// Lazy
 		some< Context > (
 			check : ( this : Context , val : Item , index : number , list : Item[] )=> boolean ,
 			context? : Context ,
@@ -130,14 +166,32 @@ namespace $ {
 			return false
 		}
 
+		// Lazy
+		every< Narrow extends Item, Context = null >( check: ( value: Item, index: number, array: Item[] )=> value is Narrow, context?: Context ): this is Narrow[]
 		every< Context = null > (
 			check : ( this : Context , val : Item , index : number , list : Item[] )=> boolean ,
 			context? : Context ,
 		) {
 			for( let index = 0 ; index < this.length ; ++ index ) {
-				if( !check.call( context as Context , this[ index ] , index , this ) ) return false
+				if( !check.call( context as Context , this[ index ] , index , this as any as Item[] ) ) return false
 			}
 			return true
+		}
+
+		reverse() {
+			return $mol_fail( new TypeError( `Mutable reverse is forbidden. Use toReversed instead.`  ) )
+		}
+
+		sort() {
+			return $mol_fail( new TypeError( `Mutable sort is forbidden. Use toSorted instead.`  ) )
+		}
+		
+		indexOf( needle: Item ) {
+			return this.findIndex( item => item === needle )
+		}
+		
+		[Symbol.toPrimitive]() {
+			return $mol_guid()
 		}
 
 	}

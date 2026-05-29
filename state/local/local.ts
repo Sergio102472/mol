@@ -13,30 +13,43 @@ namespace $ {
 				native.setItem( '' , '' )
 				native.removeItem( '' )
 				return this['native()'] = native
-			} catch( error ) {
+			} catch( error: any ) {
 				console.warn( error )
 			}
 
 			return this['native()'] = {
 				getItem( key : string ) {
-					return this[ ':' + key ]
+					return (this as any)[ ':' + key ]
 				} ,
 				setItem( key : string , value : string ) {
-					this[ ':' + key ] = value
+					(this as any)[ ':' + key ] = value
 				} ,
 				removeItem( key : string ) {
-					this[ ':' + key ] = void 0
+					(this as any)[ ':' + key ] = void 0
 				}
 			}
 
 		}
+		
+		@ $mol_mem
+		static changes( next?: StorageEvent ) { return next }
 
 		@ $mol_mem_key
-		static value< Value >( key : string , next? : Value , force? : $mol_mem_force ) : Value | null {
+		static value< Value >(
+			key : string ,
+			next? : Value | null ,
+		) : Value | null {
+			
+			this.changes()
+			
 			if( next === void 0 ) return JSON.parse( this.native().getItem( key ) || 'null' )
 			
-			if( next === null ) this.native().removeItem( key )
-			else this.native().setItem( key , JSON.stringify( next ) )
+			if( next === null ) {
+				this.native().removeItem( key )
+			} else {
+				this.native().setItem( key , JSON.stringify( next ) )
+				this.$.$mol_storage.persisted( true )
+			}
 			
 			return next
 		}

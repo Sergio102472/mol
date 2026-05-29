@@ -1,9 +1,25 @@
 namespace $ {
 
-	export class $mol_fetch_response extends $mol_object2 {
+	export class $mol_fetch_response extends $mol_object {
 
-		constructor( readonly native : Response ) {
-			super()
+		readonly native !: Response
+		readonly request !: $mol_fetch_request
+
+		status() {
+			const types = [ 'unknown', 'inform', 'success', 'redirect', 'wrong', 'failed' ] as const
+			return types[ Math.floor( this.native.status / 100 ) ]
+		}
+		
+		code() {
+			return this.native.status
+		}
+
+		ok() {
+			return this.native.ok
+		}
+		
+		message() {
+			return $mol_rest_code[this.code()] || `HTTP Error ${this.code()}`
 		}
 
 		headers() {
@@ -14,18 +30,17 @@ namespace $ {
 			return this.headers().get( 'content-type' )
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		stream() {
 			return this.native.body
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		text() {
 
 			const buffer = this.buffer()
 
-			const native = this.native
-			const mime = native.headers.get( 'content-type' ) || ''
+			const mime = this.mime() || ''
 			const [,charset] = /charset=(.*)/.exec( mime ) || [, 'utf-8']
 			
 			const decoder = new TextDecoder( charset )
@@ -33,101 +48,122 @@ namespace $ {
 
 		}	
 
-		@ $mol_fiber.method
 		json() {
-			const response = this.native
-			const parse = $mol_fiber_sync( response.json )
-			return parse.call( response ) as unknown
+			return $mol_error_enriched(this, () => $mol_wire_sync( this.native ).json() as unknown )
 		}	
 
-		@ $mol_fiber.method
+		blob() {
+			return $mol_error_enriched(this, () => $mol_wire_sync( this.native ).blob() )
+		}
+
+
 		buffer() {
-			const response = this.native
-			const parse = $mol_fiber_sync( response.arrayBuffer )
-			return parse.call( response ) as ArrayBuffer
-		}	
+			return $mol_error_enriched(this, () => $mol_wire_sync( this.native ).arrayBuffer() )
+		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		xml() {
 			return $mol_dom_parse( this.text() , 'application/xml' )
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		xhtml() {
 			return $mol_dom_parse( this.text() , 'application/xhtml+xml' )
 		}
 
-		@ $mol_fiber.method
+		@ $mol_action
 		html() {
 			return $mol_dom_parse( this.text() , 'text/html' )
 		}
 
 	}
 
-	export class $mol_fetch extends $mol_object2 {
-		
-		static request = $mol_fiber_sync( ( input : RequestInfo , init : RequestInit = {} )=> {
+	export class $mol_fetch_request extends $mol_object {
+
+		readonly native!: Request
+
+		response_async( ) {
+			const controller = new AbortController()
+			let done = false
 			
-			if( typeof AbortController === 'function' ) {
-				var controller = new AbortController()
-				init.signal = controller.signal
-				const fiber = $mol_fiber.current!
-				fiber.abort = ()=> {
-					if( fiber.cursor === $mol_fiber_status.actual ) return true
-					controller.abort()
-					return true
-				}
-			}
+			const request = new Request(this.native, { signal: controller.signal })
+			const promise = fetch( request ).finally( ()=> {
+				done = true
+			} )
+			
+			return Object.assign( promise, {
+				destructor: ()=> {
+					// Abort of done request breaks response parsing
+					if( !done && !controller.signal.aborted ) controller.abort()
+				},
+			} )
+			
+		}
 
-			let native = $mol_dom_context.fetch
-			if( !native ) native = $node['node-fetch']
+		@ $mol_action
+		response() {
+			return this.$.$mol_fetch_response.make({
+				native: $mol_wire_sync( this ).response_async(),
+				request: this
+			})
+		}
+
+		success() {
+
+			const response = this.response()
+			if( response.status() === 'success' ) return response
+			
+			throw new Error( response.message(), { cause: response } )
+		}
+	}
+
+	export class $mol_fetch extends $mol_object {
 		
-			return native( input , init )
+		@ $mol_action
+		static request( input: RequestInfo, init?: RequestInit ) {
+			return this.$.$mol_fetch_request.make({
+				native: new Request(input , init)
+			})
+		}
 
-		} )
-
-		@ $mol_fiber.method
 		static response( input: RequestInfo, init?: RequestInit ) {
-
-			const response = this.request( input , init )
-			if( Math.floor( response.status / 100 ) === 2 ) return new $mol_fetch_response( response )
-			
-			throw new Error( response.statusText || `HTTP Error ${ response.status }` )
+			return this.request(input, init).response()
 		}
 
-		@ $mol_fiber.method
+		static success( input: RequestInfo, init?: RequestInit ) {
+			return this.request( input , init ).success()
+		}
+
 		static stream( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).stream()
+			return this.success( input , init ).stream()
 		}
 
-		@ $mol_fiber.method
 		static text( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).text()
+			return this.success( input , init ).text()
 		}	
 
-		@ $mol_fiber.method
 		static json( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).json()
-		}	
+			return this.success( input , init ).json()
+		}
 
-		@ $mol_fiber.method
+		static blob( input: RequestInfo, init?: RequestInit ) {
+			return this.success( input , init ).blob()
+		}
+
 		static buffer( input: RequestInfo, init?: RequestInit ) {
-			this.response( input , init ).buffer()
+			return this.success( input , init ).buffer()
 		}	
 
-		@ $mol_fiber.method
 		static xml( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).xml()
+			return this.success( input , init ).xml()
 		}
 
-		@ $mol_fiber.method
 		static xhtml( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).xhtml()
+			return this.success( input , init ).xhtml()
 		}
 
-		@ $mol_fiber.method
 		static html( input: RequestInfo, init?: RequestInit ) {
-			return this.response( input , init ).html()
+			return this.success( input , init ).html()
 		}
 
 	}

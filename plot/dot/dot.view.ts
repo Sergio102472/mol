@@ -33,8 +33,8 @@ namespace $.$$ {
 			do {
 				indexes = []
 				for (let i = 0; i < series_x.length; i++) {
-					const point_x = series_x[i]
-					const point_y = series_y[i]
+					const point_x = this.repos_x( series_x[i] )
+					const point_y = this.repos_y( series_y[i] )
 					const scaled_x = Math.round(shift_x + point_x * scale_x)
 					const scaled_y = Math.round(shift_y + point_y * scale_y)
 
@@ -72,10 +72,22 @@ namespace $.$$ {
 		}
 
 		curve() {
+			
 			const points = this.points()
 			if( points.length === 0 ) return ''
+			
+			const diameter = this.diameter()
+			const aspect = this.aspect()
+			
+			const shift_y = Math.max( 0, Math.floor( ( aspect - 1 ) * diameter / 2 ) )
+			const shift_x = Math.max( 0, Math.floor( ( 1/aspect - 1 ) * diameter / 2 ) )
 
-			return points.map( point => `M ${point.join(' ')} v 0`).join( ' ' )
+			const size_y = Math.max( 0, Math.ceil( ( aspect - 1 ) * diameter ) )
+			const size_x = Math.max( 0, Math.ceil( ( 1/aspect - 1 ) * diameter ) )
+
+			return points.map(
+				point => `M ${ point[0] - shift_x } ${ point[1] - shift_y } l ${ size_x } ${ size_y }`
+			).join( ' ' )
 		}
 		
 	}

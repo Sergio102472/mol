@@ -2,12 +2,12 @@
 
 Component that helps to upload files to server.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_attach)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_attach_demo)
 
 ## Usage example
 ```
 <= Logos $mol_attach
-	items?val <=> logos?val /
+	items? <=> logos? /
 		<= Item1 $mol_attach_item
 			url_thumb \/mol/logo/logo.svg
 			url_load \/mol/logo/logo.svg

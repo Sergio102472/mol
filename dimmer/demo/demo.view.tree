@@ -1,21 +1,28 @@
-$mol_dimmer_demo $mol_demo_small
-	title @ \Text with highlighted found substring
+$mol_dimmer_demo $mol_example_small
+	title \Text with highlighted found substring
 	sub /
-		<= one $mol_dimmer
-			haystack \Don't put all your eggs in one basket
-			needle \eggs
-		<= two $mol_dimmer
-			haystack \Don't look a gift horse in the mouth.
-			needle \oo
-		<= three $mol_dimmer
-			haystack \There is no word you are looking for
-			needle \luck
-		<= four $mol_dimmer
-			haystack \ooAAooAAoo
-			needle \oo
-		<= five $mol_dimmer
-			haystack \Let's search this string
-			needle \Let's search this string
-		<= six $mol_dimmer
-			haystack \Let's search nothing
-			needle \
+		<= Cases $mol_list rows /
+			<= One $mol_dimmer
+				haystack \Don't put all your eggs in one basket
+				needle \eggs
+			<= Two $mol_dimmer
+				haystack \Don't look a gift horse in the mouth.
+				needle \oo
+			<= Three $mol_dimmer
+				haystack \There is no word you are looking for
+				needle \luck
+			<= Four $mol_dimmer
+				haystack \ooAAooAAoo
+				needle \oo
+			<= Five $mol_dimmer
+				haystack \Let's search this string
+				needle \Let's search this string
+			<= Six $mol_dimmer
+				haystack \Let's search nothing
+				needle \
+	tags /
+		\search
+		\highlight
+	aspects /
+		\Widget/Text
+		\Type/String

@@ -41,9 +41,7 @@ namespace $ {
 		} ,
 		
 		'format names'() {
-			$mol_assert_ok(
-				new $mol_time_moment( '2014-01-02T01:02:03.000' ).toString( 'Month Mon | WeekDay WD' )
-			)
+			new $mol_time_moment( '2014-01-02T01:02:03.000' ).toString( 'Month Mon | WeekDay WD' )
 		} ,
 		
 		'shifting'() {
@@ -56,17 +54,48 @@ namespace $ {
 			$mol_assert_equal( new $mol_time_moment( '2014-01' ).shift( 'PT-8760h' ).toString() , '2013-01' )
 		} ,
 		
+		'native from reduced'() {
+			$mol_assert_equal(
+				new $mol_time_moment( 'T15:00' ).native.toISOString().slice( 0, -5 ),
+				new $mol_time_moment().merge( 'T15:00:00' ).toOffset('Z').toString().slice( 0, -6 )
+			)
+		},
+		
 		'normalization'() {
 			$mol_assert_equal(
-				new $mol_time_moment( '2015-07-35' ).normal.toString() ,
+				new $mol_time_moment({ year: 2015, month: 6, day: 34 }).normal.toString() ,
 				'2015-08-04'
+			)
+			$mol_assert_equal(
+				new $mol_time_moment('2024-09-30 19:00+03:00').normal.month ,
+				8
 			)
 		} , 
 	
+		'renormalization'() {
+			$mol_assert_equal( new $mol_time_moment( '2024-08' ).normal.toString(), '2024-08' )
+			$mol_assert_equal( new $mol_time_moment( '2024-11' ).normal.toString(), '2024-11' )
+		} , 
+	
 		'iso week day'() {
-			$mol_assert_equal( new $mol_time_moment( '2017-09-17' ).weekday , 6 )
-			$mol_assert_equal( new $mol_time_moment( '2017-09-18' ).weekday , 0 )
+			$mol_assert_equal( new $mol_time_moment( '2017-09-17' ).weekday , $mol_time_moment_weekdays.sunday )
+			$mol_assert_equal( new $mol_time_moment( '2017-09-18' ).weekday , $mol_time_moment_weekdays.monday )
 		} ,
+		
+		'change offset'() {
+			$mol_assert_equal( new $mol_time_moment( '2021-04-10 +03:00' ).toOffset( 'Z' ).toString(), '2021-04-09T21:00:00+00:00' )
+		} ,
+		
+		'comparison'() {
+			const iso = '2021-01-02T03:04:05.678+09:10'
+			$mol_assert_equal( new $mol_time_moment( iso ), new $mol_time_moment( iso ) )
+		},
+
+		'array keeps zero offset'() {
+			const moment = new $mol_time_moment( '2026-01-25T16:37:36.129+00:00' )
+			const restored = new $mol_time_moment( moment.toArray() )
+			$mol_assert_equal( restored.offset?.count( 'PT1m' ), 0 )
+		},
 
 	} )
 }

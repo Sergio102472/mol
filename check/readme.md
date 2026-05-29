@@ -1,31 +1,45 @@
 # $mol_check
 
-A various type of checkboxes.
+Checkbox UI component. See Variants for more concrete implementations.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_check)
+## Variants
 
-## Usage example
+- [$mol_check_box](box) - Simple checkbox
+- [$mol_check_group](group) -  Group of checkboxes
+- [$mol_check_expand](expand) - Expander for trees, lists, etc
+- [$mol_check_icon](icon) - Icon checkbox
+- [$mol_check_list](list) - List of checkboxes
+
+## [Online demos](https://mol.hyoo.ru/#!section=demos/filter=%20checkbox)
+
+## Usage examples
+
+### Basic
+
+```
+<= Spam $mol_check
+	title <= spam_title @ \Send me some spam
+```
+
+### Box
 
 ```
 <= Spam $mol_check_box
 	title <= spam_title @ \Send me some spam
-	checked?val <=> spam_needed?val true
+	checked? <=> spam_needed? true
 	enabled <= spam_enabled false
 ```
 
 ## Properties
 
+### Basic
+
 **`checked( next? : boolean ) : boolean`**
 
 Returns checked state of checkbox. User can switch them when checkbox is enabled.
 
+### `box`, `expand`
+
 **`enabled() : boolean`**
 
-Returns true if checkbox can be switched by user.
-
-## Variants of visualization
-
-- [$mol_check_box](box) - simple checkbox
-- [$mol_check_group](group) - checkbox for group of check boxes
-- [$mol_check_expand](expand) - expander for hierarchical structures
-- [$mol_check_icon](icon) - iconed thumbler
+Whether the control is interactive.

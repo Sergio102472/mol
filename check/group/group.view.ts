@@ -1,5 +1,9 @@
 namespace $.$$ {
 
+	/**
+	 * Checkbox for group of check boxes.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_check_group_demo
+	 */
 	export class $mol_check_group extends $.$mol_check_group {
 		
 		@ $mol_mem
@@ -9,6 +13,7 @@ namespace $.$$ {
 				for( const check of this.checks() ) {
 					check.checked( next )
 				}
+				return next
 			}
 			
 			return this.checks().some( check => check.checked() )

@@ -1,11 +1,25 @@
 namespace $.$$ {
 	export class $mol_plot_graph extends $.$mol_plot_graph {
+		
 		viewport() {
 			const size = this.size_real()
 			return new this.$.$mol_vector_2d(
 				new this.$.$mol_vector_range(0, size.x),
 				new this.$.$mol_vector_range(0, size.y),
 			)
+		}
+		
+		@ $mol_mem
+		indexes() {
+			return this.series_x().map( (_,i)=> i ) as readonly number[]
+		}
+		
+		repos_x( val: number ) {
+			return val
+		}
+
+		repos_y( val: number ) {
+			return val
 		}
 
 		points() {
@@ -15,8 +29,12 @@ namespace $.$$ {
 			const series_y = this.series_y()
 
 			return this.indexes().map(index => {
-				const point_x = Math.round(shift_x + series_x[index] * scale_x)
-				const point_y = Math.round(shift_y + series_y[index] * scale_y)
+				
+				let point_x = Math.round(shift_x + this.repos_x( series_x[index] ) * scale_x)
+				let point_y = Math.round(shift_y + this.repos_y( series_y[index] ) * scale_y)
+
+				point_x = Math.max( Number.MIN_SAFE_INTEGER, Math.min( point_x, Number.MAX_SAFE_INTEGER ) )
+				point_y = Math.max( Number.MIN_SAFE_INTEGER, Math.min( point_y, Number.MAX_SAFE_INTEGER ) )
 
 				return [point_x, point_y]
 			}) as readonly( readonly number[] )[]
@@ -37,9 +55,12 @@ namespace $.$$ {
 			const series_x = this.series_x()
 			const series_y = this.series_y()
 			for(let i = 0; i < series_x.length; i++) {
-				next = next.expanded1([series_x[i], series_y[i]] as const)
+				if( series_x[i] > next.x.max ) next.x.max = this.repos_x( series_x[i] )
+				if( series_x[i] < next.x.min ) next.x.min = this.repos_x( series_x[i] )
+				if( series_y[i] > next.y.max ) next.y.max = this.repos_y( series_y[i] )
+				if( series_y[i] < next.y.min ) next.y.min = this.repos_y( series_y[i] )
 			}
-			
+
 			return next
 		}
 		

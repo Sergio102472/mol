@@ -1,5 +1,9 @@
 namespace $.$$ {
 
+	/**
+	 * Fastest plot lib for vector graphics.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_plot_demo
+	 */
 	export class $mol_plot_pane extends $.$mol_plot_pane {
 		
 		@ $mol_mem
@@ -32,16 +36,18 @@ namespace $.$$ {
 		
 		@ $mol_mem
 		graphs_colored() {
-			const graphs = this.graphs_positioned()
+			const graphs = this.graphs_visible()
 			for (let index = 0; index < graphs.length; index++) {
-				graphs[index].hue = () => this.graph_hue( index )
+				graphs[index].hue( this.graph_hue( index ) )
 			}
 			
 			return graphs
 		}
 		
 		size_real() {
-			return new this.$.$mol_vector_2d(this.width() , this.height())
+			const rect = this.view_rect()
+			if( !rect ) return new this.$.$mol_vector_2d( 1, 1 )
+			return new this.$.$mol_vector_2d( rect.width, rect.height )
 		}
 
 		view_box() {
@@ -64,32 +70,40 @@ namespace $.$$ {
 
 			return new this.$.$mol_vector_2d(
 				new this.$.$mol_vector_range(left, right),
-				new this.$.$mol_vector_range(bottom, top),
+				new this.$.$mol_vector_range(top, bottom),
 			)
 		}
 
 		scale_default() {
 			const limits = this.scale_limit()
-			return [limits.x.min, limits.y.min] as const
+			return new $mol_vector_2d( limits.x.min, limits.y.max )
 		}
 
 		@ $mol_mem
-		scale(next?: readonly [number, number], force?: $mol_mem_force) : readonly [number, number] {
+		scale(next?: $mol_vector_2d< number >): $mol_vector_2d< number > {
 			if (next === undefined) {
 				if (!this.graph_touched) return this.scale_default()
-				next = $mol_mem_cached( ()=> this.scale() ) || this.scale_default()
+				next = $mol_mem_cached( ()=> this.scale() ) ?? this.scale_default()
 			}
 			this.graph_touched = true
 
-			return new this.$.$mol_vector_2d( ...next ).limited(this.scale_limit())
+			return next!.limited(this.scale_limit())
 		}
 
 		scale_x(next?: number): number {
-			return this.scale( next === undefined ? undefined : [ next , this.scale()[1] ] )[0]
+			return this.scale(
+				next === undefined
+					? undefined
+					: new $mol_vector_2d( next , this.scale().y )
+			).x
 		}
 
 		scale_y(next?: number): number {
-			return this.scale( next === undefined ? undefined : [ this.scale()[0] , next ] )[1]
+			return this.scale(
+				next === undefined
+					? undefined
+					: new $mol_vector_2d( this.scale().x , next )
+			).y
 		}
 
 		@ $mol_mem
@@ -114,37 +128,68 @@ namespace $.$$ {
 		@ $mol_mem
 		shift_default() {
 			const limits = this.shift_limit()
-			return [limits.x.min, limits.y.min] as const
+			return new $mol_vector_2d( limits.x.min, limits.y.min )
 		}
 
 		graph_touched: boolean = false
 
 		@ $mol_mem
-		shift(next?: readonly [number, number], force?: $mol_mem_force) : readonly [number, number]{
+		shift(next?: $mol_vector_2d< number >): $mol_vector_2d< number > {
 
 			if (next === undefined) {
 				if (!this.graph_touched) return this.shift_default()
-				next = $mol_mem_cached( ()=> this.shift() ) || this.shift_default()
+				next = $mol_mem_cached( ()=> this.shift() ) ?? this.shift_default()
 			}
 
 			this.graph_touched = true
 
-			return new this.$.$mol_vector_2d( ...next! ).limited(this.shift_limit())
+			return next!.limited(this.shift_limit())
 		}
 
 		reset(event?: Event) {
 			this.graph_touched = false
-			this.scale(this.scale_default(), $mol_mem_force_cache)
-			this.shift(this.shift_default(), $mol_mem_force_cache)
+			this.scale(this.scale_default())
+			this.shift(this.shift_default())
 		}
 
+		@ $mol_mem
+		graphs_visible() {
+			
+			const viewport = this.dimensions_viewport()
+			const size_real = this.size_real()
+			
+			const max_x = ( viewport.x.max - viewport.x.min ) / size_real.x
+			const max_y = ( viewport.y.max - viewport.y.min ) / size_real.y
+			
+			return this.graphs_positioned().filter( graph => {
+				
+				const dims = graph.dimensions()
+				
+				if( dims.x.min > dims.x.max ) return true
+				if( dims.y.min > dims.y.max ) return true
+				
+				const size_x = dims.x.max - dims.x.min
+				const size_y = dims.y.max - dims.y.min
+				if( ( size_x || size_y ) && size_x < max_x && size_y < max_y ) return false
+				
+				if( dims.x.min > viewport.x.max ) return false
+				if( dims.x.max < viewport.x.min ) return false
+				
+				if( dims.y.min > viewport.y.max ) return false
+				if( dims.y.max < viewport.y.min ) return false
+				
+				return true
+			} )
+			
+		}
+		
 		@ $mol_mem
 		graphs_positioned() {
 			const graphs = this.graphs()
 			for (let graph of graphs) {
 				graph.shift = ()=> this.shift()
 				graph.scale = ()=> this.scale()
-				graph.dimensions_pane = () => this.dimensions()
+				graph.dimensions_pane = () => this.dimensions_viewport()
 				graph.viewport = () => this.viewport()
 				graph.size_real = ()=> this.size_real()
 				graph.cursor_position = ()=> this.cursor_position()
@@ -152,6 +197,13 @@ namespace $.$$ {
 			}
 			
 			return graphs
+		}
+		
+		@ $mol_mem
+		dimensions_viewport() {
+			const shift = this.shift().multed0(-1)
+			const scale = this.scale().powered0(-1)
+			return this.viewport().map( ( range, i )=> range.added0( shift[i] ).multed0( scale[i] ).sort( (a,b)=>a-b) )
 		}
 
 		@ $mol_mem

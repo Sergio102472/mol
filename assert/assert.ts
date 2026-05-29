@@ -1,16 +1,35 @@
 namespace $ {
 	
+	/**
+	 * Argument must be Truthy
+	 * @deprecated use $mol_assert_equal instead
+	 */
 	export function $mol_assert_ok( value : any ) {
 		if( value ) return
 		$mol_fail( new Error( `${value} ≠ true` ) )
 	}
 	
+	/**
+	 * Argument must be Falsy
+	 * @deprecated use $mol_assert_equal instead
+	 */
 	export function $mol_assert_not( value : any ) {
 		if( !value ) return
 		$mol_fail( new Error( `${value} ≠ false` ) )
 	}
 	
-	export function $mol_assert_fail( handler : ()=> any , ErrorRight? : any ) {
+	/**
+	 * Handler must throw an error.
+	 * @example
+	 * $mol_assert_fail( ()=>{ throw new Error( 'Parse error' ) } ) // Passes because throws error
+	 * $mol_assert_fail( ()=>{ throw new Error( 'Parse error' ) } , 'Parse error' ) // Passes because throws right message
+	 * $mol_assert_fail( ()=>{ throw new Error( 'Parse error' ) } , Error ) // Passes because throws right class
+	 * @see https://mol.hyoo.ru/#!section=docs/=9q9dv3_fgxjsf
+	 */
+	export function $mol_assert_fail(
+		handler: ()=> any ,
+		ErrorRight: string | typeof Error | typeof Promise
+	) {
 		
 		const fail = $.$mol_fail
 		
@@ -19,14 +38,14 @@ namespace $ {
 			
 			handler()
 
-		} catch( error ) {
+		} catch( error: any ) {
 			
-			if( !ErrorRight ) return error
-			
+			$.$mol_fail = fail
+
 			if( typeof ErrorRight === 'string' ) {
-				if( error.message !== ErrorRight ) throw error
+				$mol_assert_equal( error.message ?? error, ErrorRight )
 			} else {
-				if(!( error instanceof ErrorRight )) throw error
+				$mol_assert_equal( error instanceof ErrorRight, true )
 			}
 			
 			return error
@@ -35,48 +54,56 @@ namespace $ {
 			$.$mol_fail = fail
 		}
 
-		$mol_fail( new Error( 'Not failed' ) )
+		$mol_fail( new Error( 'Not failed', { cause: { expect: ErrorRight } } ) )
 	}
 	
-	export function $mol_assert_equal< Value >( ... args : Value[] ) {
+	/** @deprecated Use $mol_assert_equal */
+	export function $mol_assert_like< Value >( ... args : [ Value, Value, ...Value[] ] ) {
+		$mol_assert_equal( ... args )
+	}
+	
+	/**
+	 * All arguments must not be structural equal to each other.
+	 * @example
+	 * $mol_assert_unique( 1 , 2 , 3 ) // Passes
+	 * $mol_assert_unique( 1 , 1 , 2 ) // Fails because 1 === 1
+	 * @see https://mol.hyoo.ru/#!section=docs/=9q9dv3_fgxjsf
+	 */
+	export function $mol_assert_unique( ... args : [ any, any, ...any[] ] ) {
+		
 		for( let i = 0 ; i < args.length ; ++i ) {
 			for( let j = 0 ; j < args.length ; ++j ) {
-				if( i === j ) continue
-				if( Number.isNaN( args[i] as any as number ) && Number.isNaN( args[j] as any as number ) ) continue
-				if( args[i] !== args[j] ) $mol_fail( new Error( `Not equal\n${ args[i] }\n${ args[j] }` ) )
-			}
-		}
-	}
-	
-	export function $mol_assert_unique( ... args : any[] ) {
-		for( let i = 0 ; i < args.length ; ++i ) {
-			for( let j = 0 ; j < args.length ; ++j ) {
-				if( i === j ) continue
-				if( args[i] === args[j] || ( Number.isNaN( args[i] as any as number ) && Number.isNaN( args[j] as any as number ) ) ) {
-					$mol_fail( new Error( `args[${ i }] = args[${ j }] = ${ args[i] }` ) )
-				}
-			}
-		}
-	}
-	
-	export function $mol_assert_like< Value >( head : Value , ... tail : Value[] ) {
-		for( let value of tail ) {
-
-			if( $mol_compare_deep( value , head ) ) {
-				head = value
-			} else {
-
-				const print = ( val : any ) => {
-					if( !val ) return val
-					if( typeof val !== 'object' ) return val
-					if( 'outerHTML' in val ) return val.outerHTML
-					return val
-				}
 				
-				return $mol_fail( new Error( `Not like\n${ print( head ) }\n---\n${ print( value ) }` ) )
-
+				if( i === j ) continue
+				if( !$mol_compare_deep( args[i], args[j] ) ) continue
+				
+				return $mol_fail( new Error(
+					`Uniquesess assertion failure`,
+					{ cause: { [i]: args[i], [i]: args[i] } },
+				) )
+				
 			}
-
+		}
+		
+	}
+	
+	/**
+	 * All arguments must be structural equal each other.
+	 * @example
+	 * $mol_assert_like( [1] , [1] , [1] ) // Passes
+	 * $mol_assert_like( [1] , [1] , [2] ) // Fails because 1 !== 2
+	 * @see https://mol.hyoo.ru/#!section=docs/=9q9dv3_fgxjsf
+	 */
+	export function $mol_assert_equal< Value >( ... args : [ Value, Value, ... Value[] ] ) {
+		for( let i = 1 ; i < args.length ; ++i ) {
+			
+			if( $mol_compare_deep( args[0] , args[i] ) ) continue
+			
+			return $mol_fail( new Error(
+				`Equality assertion failure`,
+				{ cause: { 0: args[0], [i]: args[i] } },
+			) )
+			
 		}
 	}
 	

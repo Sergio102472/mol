@@ -1,18 +1,52 @@
 namespace $ {
-	
+
+	/** State of arguments like `#foo=bar/xxx` or `?foo=bar&xxx` */
 	export class $mol_state_arg extends $mol_object {
 		
 		@ $mol_mem
-		static href( next? : string , force? : $mol_mem_force ) {
-			if( next === undefined ) return $mol_dom_context.location.href
-			history.replaceState( history.state , $mol_dom_context.document.title , next )
+		static href( next?: string ) {
+			
+			if( next === undefined ) {
+				
+				next = $mol_dom.location.href
+				
+			} else if( !/^about:srcdoc/.test( next ) ) {
+				
+				new $mol_after_frame( ()=> {
+					
+					const next = this.href()
+					const prev = $mol_dom.location.href
+					if( next === prev ) return
+					
+					const history = $mol_dom.history
+					history.replaceState( history.state, $mol_dom.document.title, next )
+					
+				} )
+				
+			}
+			
+			if( $mol_dom.parent && ( $mol_dom.parent !== $mol_dom.self ) ) {
+				$mol_dom.parent.postMessage( [ 'hashchange', next ], '*' )
+			}
+			
 			return next
 		}
 		
 		@ $mol_mem
+		static href_normal(): string {
+			return this.link({})
+		}
+		
+		@ $mol_mem
+		static href_absolute(): string {
+			return new URL( this.href(), $mol_dom.location.href ).toString()
+		}
+		
+		@ $mol_mem
 		static dict( next? : { [ key : string ] : string | null } ) {
-			var href = this.href( next && this.make_link( next ) ).split( /#/ )[1] || ''
-			var chunks = href.split( /[\/\?#&;]/g )
+			
+			var href = this.href( next && this.make_link( next ) ).split( /#!?/ )[1] || ''
+			var chunks = href.split( this.separator )
 			
 			var params : { [ key : string ] : string } = {}
 			chunks.forEach(
@@ -23,7 +57,7 @@ namespace $ {
 				}
 			)
 			
-			return params
+			return params as Readonly< typeof params >
 		}
 
 		@ $mol_mem_key
@@ -33,7 +67,7 @@ namespace $ {
 			const cut : { [ key : string ] : string } = {}
 			
 			for( const key in dict ) {
-				if( except.indexOf( key ) >= 0 ) continue
+				if( except.indexOf( key ) >= 0 ) break
 				cut[ key ] = dict[ key ]
 			}
 			
@@ -42,15 +76,22 @@ namespace $ {
 		
 		@ $mol_mem_key
 		static value( key : string , next? : string | null ) {
-			const nextDict = ( next === void 0 ) ? void 0 : $mol_merge_dict( this.dict() , { [ key ] : next } ) 
+			const nextDict = ( next === void 0 ) ? void 0 : { ... this.dict() , [ key ] : next }
 			const next2 = this.dict( nextDict )[ key ]
 			return ( next2 == null ) ? null : next2
 		}
 		
-		static link( next : { [ key : string ] : string } ) {
-			return this.make_link( $mol_merge_dict( this.dict_cut( Object.keys( next ) ) , next ) )
+		static link( next : Record<string, string | null> ) {
+			return this.make_link({
+				... this.dict_cut( Object.keys( next ) ),
+				... next,
+			})
 		}
 		
+		static prolog = '!'
+		static separator = '/'
+		
+		@ $mol_mem_key
 		static make_link( next : { [ key : string ] : string | null } ) {
 			const chunks : string[] = []
 			for( let key in next ) {
@@ -59,9 +100,24 @@ namespace $ {
 				chunks.push( [ key ].concat( val ? [ val ] : [] ).map( this.encode ).join( '=' ) )
 			}
 			
-			return new URL( '#' + chunks.join( '/' ) , $mol_dom_context.location.href ).toString()
+			return new URL( '#' + this.prolog + chunks.join( this.separator ) , this.href_absolute() ).toString()
 		}
 
+		@ $mol_action
+		static commit() {
+			$mol_dom.history.pushState(
+				$mol_dom.history.state,
+				$mol_dom.document.title,
+				this.href(),
+			)
+		}
+		
+
+		@ $mol_action
+		static go( next : { [ key : string ] : string | null } ) {
+			$mol_dom.location.href = this.link( next )
+		}
+		
 		static encode( str : string ) {
 			return encodeURIComponent( str ).replace( /\(/g , '%28' ).replace( /\)/g , '%29' )
 		}
@@ -78,9 +134,9 @@ namespace $ {
 			return new ( this.constructor as typeof $mol_state_arg )( this.prefix + postfix + '.' )
 		}
 		
-		link( next : { [ key : string ] : string } ) {
+		link( next : Record<string, string | null> ) {
 			var prefix = this.prefix
-			var dict : { [ key : string ] : string } = {}
+			var dict : typeof next = {}
 			for( var key in next ) {
 				dict[ prefix + key ] = next[ key ]
 			}
@@ -88,9 +144,11 @@ namespace $ {
 		}
 		
 	}
-	
-	self.addEventListener( 'hashchange' , $mol_fiber_root( $mol_log_group( '$mol_state_arg hashchange' , ( event : HashChangeEvent )=> {
-		$mol_state_arg.href( $mol_dom_context.location.href ) 
-	} ) ) )
+
+	function $mol_state_arg_change( ) {
+		$mol_state_arg.href( $mol_dom.location.href )
+	}
+
+	self.addEventListener( 'hashchange' , $mol_state_arg_change )
 	
 }

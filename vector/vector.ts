@@ -2,7 +2,9 @@ namespace $ {
 
 	export class $mol_vector< Value , Length extends number > extends Array< Value > {
 
-		length! : Length
+		get length() {
+			return super.length as Length
+		}
 
 		constructor( ... values : Value[] & { length : Length } ) { super( ... values ) }
 		
@@ -35,6 +37,10 @@ namespace $ {
 			return this.merged( diff , ( a , b )=> a + b ) as any
 		}
 
+		substracted1( this : $mol_vector< number , Length > , diff : readonly number[] & { length : Length } ) : this {
+			return this.merged( diff , ( a , b )=> a - b ) as any
+		}
+
 		multed0( this : $mol_vector< number , Length > , mult : number ) : this {
 			return this.map( value => value * mult ) as any
 		}
@@ -44,6 +50,17 @@ namespace $ {
 			mults : readonly number[] & { length : Length } ,
 		) : this {
 			return this.merged( mults , ( a , b )=> a * b ) as any
+		}
+
+		divided1(
+			this : $mol_vector< number , Length > ,
+			mults : readonly number[] & { length : Length } ,
+		) : this {
+			return this.merged( mults , ( a , b )=> a / b ) as any
+		}
+
+		powered0( this : $mol_vector< number , Length > , mult : number ) : this {
+			return this.map( value => value ** mult ) as any
 		}
 
 		expanded1(
@@ -67,35 +84,64 @@ namespace $ {
 			}) as any
 		}
 
-	}
+		center< Item extends $mol_vector< number, number > >(
+			this : $mol_vector< Item , Length > ,
+		) : Item {
+			const Result = this[0].constructor as typeof $mol_vector
+			return new Result( ... this[0].map( (_,i)=> this.reduce( ( sum, point )=> sum + point[i], 0 ) / this.length ) ) as any
+		}
 
-	export class $mol_vector_1d< Value > extends $mol_vector< Value , 1 > {
-		[0]: Value
-		get x() { return this[0] }
-	}
+		distance(
+			this : $mol_vector< $mol_vector< number, number >, Length > ,
+		): number {
+			let distance = 0
+			
+			for( let i = 1; i < this.length; ++i ) {
+				distance += this[ i - 1 ].reduce( ( sum, min, j )=> sum + ( min - this[i][j] ) ** 2, 0 ) ** ( 1 / this[i].length )
+			}
+			
+			return distance
+		}
 
-	export class $mol_vector_2d< Value > extends $mol_vector< Value , 2 > {
-		[0]: Value
-		[1]: Value
+		transponed(
+			this : $mol_vector< $mol_vector< number, number >, Length > ,
+		): $mol_vector< $mol_vector< number, Length >, typeof this[0]['length'] > {
+			return this[0].map( ( _, i )=> this.map( row => row[i] ) )
+		}
+
 		get x() { return this[0] }
+		set x( next: Value ) { this[0] = next }
+		
 		get y() { return this[1] }
-	}
-
-	export class $mol_vector_3d< Value > extends $mol_vector< Value , 3 > {
-		[0]: Value
-		[1]: Value
-		[2]: Value
-		get x() { return this[0] }
-		get y() { return this[1] }
+		set y( next: Value ) { this[1] = next }
+		
 		get z() { return this[2] }
+		set z( next: Value ) { this[2] = next }
+		
 	}
 
+	export class $mol_vector_1d< Value > extends $mol_vector< Value , 1 > { }
+
+	export class $mol_vector_2d< Value > extends $mol_vector< Value , 2 > {}
+
+	export class $mol_vector_3d< Value > extends $mol_vector< Value , 3 > {}
 
 	export class $mol_vector_range< Value > extends $mol_vector< Value , 2 > {
-		[0]: Value
-		[1]: Value
+		
+		0: Value
+		1: Value
+		
+		constructor( min: Value, max = min ) {
+			super( min, max )
+			this[0] = min
+			this[1] = max
+		}
+		
 		get min() { return this[0] }
+		set min( next: Value ) { this[0] = next }
+		
 		get max() { return this[1] }
+		set max( next: Value ) { this[1] = next }
 		
 		get inversed() {
 			return new ( this.constructor as typeof $mol_vector_range )( this.max , this.min )

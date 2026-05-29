@@ -3,36 +3,73 @@ namespace $.$$ {
 		
 		@ $mol_mem
 		rows() {
-			$mol_mem_persist()
-			return [ ... $mol_range2( index => this.Row( index ) , ()=> this.count() ) ]
+			return $mol_range2(
+				index => this.Row( index ),
+				()=> this.count(),
+			)
+		}
+		
+		@ $mol_mem
+		check_list() {
+			return Array.from(
+				{ length: this.count() },
+				(_,i)=> this.Id(i),
+			)
 		}
 
-		row_id( id : number ) {
-			return String( id )
+		row_id( id: number ) {
+			return String( id ).padStart( 5, '0' )
 		}
 
 		@ $mol_mem_key
-		row_title( id : number ) {
-			$mol_mem_persist()
+		row_title( id: number ) {
+			$mol_wire_solid()
 			return $mol_stub_product_name()
 		}
 
 		@ $mol_mem_key
-		row_number( id : number , next? : number ) {
-			$mol_mem_persist()
-			return next ?? id+1
+		row_quantity(
+			id: number,
+			next = Math.floor( Math.random() * 100 )
+		) {
+			$mol_wire_solid()
+			return next
 		}
 
 		@ $mol_mem_key
-		row_uri( id : number ) {
-			$mol_mem_persist()
-			return `http://xkcd.com/${ this.row_number( id ) }`
+		row_status(
+			id: number,
+			next = $mol_array_lottery( Object.keys( this.status_options() ) )
+		) {
+			$mol_wire_solid()
+			return next
 		}
 
 		@ $mol_mem_key
-		row_moment( id : number , next? : $mol_time_moment ) {
-			$mol_mem_persist()
-			return next ?? new $mol_time_moment().shift({ day : this.row_number( id ) })
+		row_uri( id: number ) {
+			return `http://xkcd.com/${ this.row_id( id ) }`
+		}
+
+		@ $mol_mem_key
+		row_moment(
+			id: number,
+			next = new $mol_time_moment().shift({
+				day: Math.floor( Math.random() * 100 )
+			})
+		) {
+			$mol_wire_solid()
+			return next
+		}
+		
+		@ $mol_mem
+		colors() {
+			return Object.keys( $mol_colors )
+		}
+		
+		@ $mol_mem_key
+		row_color( id: number, next?: string ) {
+			$mol_wire_solid()
+			return next ?? $mol_array_lottery( this.colors() )
 		}
 
 	}

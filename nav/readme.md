@@ -2,14 +2,14 @@
 
 Plugin which can navigate in list of items
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_nav_demo)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_nav_demo)
 
 ## Usage example
 ```
 plugins /
 	<= Nav $mol_nav
 		keys_y <= component_list /
-		current_y?val <=> selected_component?val 0
+		current_y? <=> selected_component? 0
 ```
 
 ## Properties
@@ -34,11 +34,11 @@ Property `current_x` is an current item in `keys_x`.
 
 **`cycle( value? : boolean ) : boolean`**
 
-Property `cycle` activate or disable cycle navigation ( If on last item we fires navigate on next item, it navigate on first item ).
+Property `cycle` activate or disable cycle navigation.
 
 ## Modifiers
 
-If true than check for same key are pressed.
+If true, then check if the same key is pressed.
 
 **`mod_ctrl() : boolean`**
 **`mod_shift() : boolean`**

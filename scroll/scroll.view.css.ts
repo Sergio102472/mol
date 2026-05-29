@@ -1,46 +1,56 @@
 namespace $.$$ {
 
-	const { per , rem } = $mol_style_unit
+	const { per , rem , px } = $mol_style_unit
 
 	$mol_style_define( $mol_scroll , {
 
-		display: 'block',
+		display: 'grid',
 		overflow: 'auto',
-		flex: 'auto',
-		alignSelf: 'stretch',
+		flex: {
+			direction: 'column',
+			grow: 1,
+			shrink: 1,
+			// basis: 0,
+		},
+		outline: 'none',
+		align: {
+			self: 'stretch',
+			items: 'flex-start',
+		},
 		boxSizing: 'border-box',
 		willChange: 'scroll-position',
-		transform: 'translateZ(0)', // enforce gpu scroll in all agents
+		scroll: {
+			padding: [ rem(.75), 0 ],
+		},
 		maxHeight: per(100),
 		maxWidth: per(100),
 		webkitOverflowScrolling: 'touch',
-	
-		'::-webkit-scrollbar': {
-			width: rem(.5),
-			height: rem(.5),
+		contain: 'content',
+
+		'>': {
+			$mol_view: {
+				// transform: 'translateZ(0)', // enforce gpu scroll in all agents
+				gridArea: '1/1',
+			},
+		},
+
+		'::before': {
+			display: 'none',
+		},
+		'::after': {
+			display: 'none',
 		},
 		
-		'::-webkit-scrollbar-corner': {
-			background: {
-				color: $mol_theme.line,
-			},
+		'::-webkit-scrollbar': {
+			width: rem(.25),
+			height: rem(.25),
 		},
-
-		'::-webkit-scrollbar-track': {
-			background: {
-				color: $mol_theme.line,
-			},
-		},
-
-		'::-webkit-scrollbar-thumb': {
-			background: {
-				color: $mol_theme.control,
-			},
-		},
-
+		
 		'@media' : {
 			'print' : {
-				overflow: 'visible',
+				overflow: 'hidden',
+				contain: 'none',
+				maxHeight: 'unset',
 			},
 		},
 

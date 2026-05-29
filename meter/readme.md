@@ -2,7 +2,7 @@
 
 Plugin which get actual sizes and offsets 
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_meter_demo)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_meter_demo)
 
 ## Usage example
 ```

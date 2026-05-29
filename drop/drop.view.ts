@@ -4,15 +4,20 @@ namespace $.$$ {
 		@ $mol_mem
 		status( next = 'ready' as 'ready' | 'drag' ) { return next }
 
+		protected _target = null as EventTarget | null
+
 		enter( event : DragEvent ) {
 
 			if( event.defaultPrevented ) return
-			if( event.target !== this.dom_node() ) return
+			if( !this.enabled() ) return
 			// if( !this.adopt( event.dataTransfer! ) ) return
 
-			setTimeout( ()=> this.status( 'drag' ) )
+			const action = this.decide_action( event )
+			event.dataTransfer!.dropEffect = action
 			
-			event.dataTransfer!.dropEffect = 'move'
+			if( action !== 'none' ) this.status( 'drag' )
+			this._target = event.target
+			
 			event.preventDefault()
 			
 		}
@@ -20,23 +25,31 @@ namespace $.$$ {
 		move( event : DragEvent ) {
 			
 			if( event.defaultPrevented ) return
+			if( !this.enabled() ) return
 
 			// if( !this.adopt( event.dataTransfer! ) ) return
 			
-			event.dataTransfer!.dropEffect = 'move'
+			event.dataTransfer!.dropEffect = this.decide_action( event )
+			
 			event.preventDefault()
 
 		}
-
-		leave( event : DragEvent ) {
-			
-			if( event.target !== this.dom_node() ) return
-			
-			setTimeout( ()=> this.status( 'ready' ) )
-			
+		
+		decide_action( event: DragEvent ) {
+			const allow = this.allow()
+			if( allow.includes( 'move' ) && event.shiftKey ) return 'move'
+			else if( allow.includes( 'copy' ) && event.ctrlKey ) return 'copy'
+			else if( allow.includes( 'link' ) && event.altKey ) return 'link'
+			else return allow[0]
 		}
 
-		receive( transfer : DataTransfer ) {
+		leave( event : DragEvent ) {
+			if( this._target === event.target ) {
+				this.status( 'ready' )
+			}
+		}
+
+		receive( transfer : unknown ) {
 			return transfer as unknown
 		}
 

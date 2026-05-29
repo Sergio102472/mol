@@ -1,12 +1,19 @@
-$mol_speech_demo $mol_demo_small
+$mol_speech_demo $mol_example_small
 	sub /
 		<= Toggle $mol_check_icon
 			Icon <= Toggle_icon $mol_icon_microphone
-			checked?val <=> hearing?val false
-		<= Message $mol_view
+			checked? <=> hearing? false
+		<= Message $mol_row
 			sub /
 				<= message \
 		<= Speak $mol_button_major
-			click?val <=> speak?val false
+			click? <=> speak? null
 			sub / \Speak
-		
+	tags /
+		\speech
+		\voice
+		\recognition
+		\dictation
+	aspects /
+		\Widget/Plugin
+		\Media/Audio

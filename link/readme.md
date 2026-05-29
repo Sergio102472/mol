@@ -2,13 +2,13 @@
 
 Dynamic hyperlink. It can to add, change or remove parameters. The link leads to current page would be stylized in other way.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_link)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_link_demo)
 
 ## Properties
 
 **`arg() : { [ name : string ] : string }`**
 
-Returns patch that will be applied to page url. 
+Returns patch that will be applied to page URL. 
 
 ```
 <= Close $mol_link
@@ -20,7 +20,7 @@ Returns patch that will be applied to page url.
 
 **`uri() : string`**
 
-Returns target uri.
+Returns target URI.
 
 ```
 <= Example $mol_link
@@ -51,3 +51,6 @@ Returns hint that displays on hover.
 	target \_blank
 ```
 
+**`file_name() : string`**
+
+Used to download files. See "Download" in [demo](./demo/demo.view.tree)

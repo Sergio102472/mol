@@ -17,6 +17,8 @@ namespace $ {
 	| ':first-of-type'
 	| ':fullscreen'
 	| ':focus'
+	| ':focus-visible'
+	| ':focus-within'
 	| ':hover'
 	| ':indeterminate'
 	| ':in-range'
@@ -25,19 +27,16 @@ namespace $ {
 	| ':last-of-type'
 	| ':left'
 	| ':link'
-	| ':not()'
-	| ':nth-child(even)'
-	| ':nth-child(odd)'
-	| ':nth-last-child(even)'
-	| ':nth-last-child(odd)'
-	| ':nth-of-type(even)'
-	| ':nth-of-type(odd)'
-	| ':nth-last-of-type(even)'
-	| ':nth-last-of-type(odd)'
+	| `:not(${string})`
+	| `:nth-child(${string})`
+	| `:nth-last-child(${string})`
+	| `:nth-of-type(${string})`
+	| `:nth-last-of-type(${string})`
 	| ':only-child'
 	| ':only-of-type'
 	| ':optional'
 	| ':out-of-range'
+	| ':placeholder-shown'
 	| ':read-only'
 	| ':read-write'
 	| ':required'

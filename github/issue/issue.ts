@@ -5,6 +5,7 @@ namespace $ {
 		labels_url : string
 		comments_url : string
 		events_url : string
+		html_url : string
 		number : number
 		title : string
 		user : $mol_github_user_json
@@ -14,7 +15,6 @@ namespace $ {
 		assignees : $mol_github_user_json[]
 		milestone : { url : string }
 		comments : 2
-		closed_at : string
 		author_association : string
 		body : string
 		closed_by : $mol_github_user_json
@@ -22,19 +22,19 @@ namespace $ {
 
 	export class $mol_github_issue extends $mol_model< $mol_github_issue_json > {
 
-		json_update( patch : Partial< $mol_github_issue_json > ) {
+		json_update( patch? : Partial< $mol_github_issue_json > ) {
 			
-			if( patch.user ) $mol_github_user.item( patch.user.url! ).json_update( patch.user )
+			if( patch?.user ) $mol_github_user.item( patch.user.url! ).json_update( patch.user )
 			
-			if( patch.closed_by ) $mol_github_user.item( patch.closed_by.url! ).json_update( patch.closed_by )
+			if( patch?.closed_by ) $mol_github_user.item( patch.closed_by.url! ).json_update( patch.closed_by )
 			
-			if( patch.assignees ) {
+			if( patch?.assignees ) {
 				for( let assignee of patch.assignees ) {
 					$mol_github_user.item( assignee.url! ).json_update( assignee )
 				}
 			}
 			
-			if( patch.labels ) {
+			if( patch?.labels ) {
 				for( let label of patch.labels ) {
 					$mol_github_label.item( label.url! ).json_update( label )
 				}
@@ -46,17 +46,33 @@ namespace $ {
 		repository() {
 			return $mol_github_repository.item( this.uri().replace( /\/[^\/]*\/[^\/]*$/ , '' ) )
 		}
+		
+		web_uri() {
+			return this.json().html_url
+		}
 
 		author() {
 			return $mol_github_user.item( this.json().user.url! )
+		}
+
+		owner() {
+			const url = this.json().repository_url
+				.replace( /\/[^\/]+$/, '' )
+				.replace( /\/repos\//, '/users/' )
+			return $mol_github_user.item( url )
+		}
+
+		number() {
+			return this.json().number
 		}
 
 		title() {
 			return this.json().title
 		}
 
+		@ $mol_mem
 		text() {
-			return this.json().body
+			return this.json().body ?? this.json( null ).body ?? ''
 		}
 
 		closer() {
@@ -74,9 +90,14 @@ namespace $ {
 		}
 
 		@ $mol_mem
-		moment_closed() {
-			return new $mol_time_moment( this.json().updated_at )
+		moment_created() {
+			return new $mol_time_moment( this.json().created_at )
 		}
+
+		@ $mol_mem
+		moment_updated() {
+			return new $mol_time_moment( this.json().updated_at )
+		}	
 
 		@ $mol_mem
 		comments() {
@@ -87,26 +108,22 @@ namespace $ {
 
 	export class $mol_github_issue_comments extends $mol_model< $mol_github_comment_json[] > {
 		
-		json_update( patch : Partial<$mol_github_repository_json[]> ) {
+		json_update( patch : Partial<$mol_github_comment_json[]> ) {
 			
-			if( patch ) {
-				for( let comment of patch ) {
-					$mol_github_comment.item( comment!.url! ).json_update( comment! )
-				}
+			for( let comment of patch ) {
+				$mol_github_comment.item( comment!.url! ).json_update( comment! )
 			}
-
-			const cache = $mol_model.cache< $mol_github_comment_json[] >()
 			
-			return cache[ this.uri() ] = patch as $mol_github_comment_json[]
+			return super.json_update( patch )
 		}
 
 		@ $mol_mem
-		items( next? : $mol_github_comment[] , force? : $mol_mem_force ) {
-			return this.json( undefined , force ).map( json => $mol_github_comment.item( json.url! ) )
+		items( next? : null ) {
+			return this.json( next ).map( json => $mol_github_comment.item( json.url! ) )
 		}
 
 		@ $mol_mem_key
-		add( config : { text : string } , next? : $mol_github_comment , force? : $mol_mem_force ) {
+		add( config : { text : string } , next? : $mol_github_comment ) {
 			if( !config ) return
 
 			try {
@@ -121,16 +138,16 @@ namespace $ {
 				} ) as $mol_github_comment_json
 
 				const comment = $mol_github_comment.item( json.url! )
-				comment.json_update( json )
+				comment.json( json )
 
-				this.json( undefined , $mol_mem_force_cache )
+				this.json( null )
 				
 				return comment
 
-			} catch( error ) {
+			} catch( error: any ) {
 				
 				if( error.message === 'Unauthorized' ) {
-					$mol_github_auth.token_last( undefined , $mol_mem_force_update ).valueOf()
+					$mol_github_auth.token_last( undefined , $mol_mem_force_update )
 				}
 				
 				throw error

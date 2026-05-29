@@ -5,11 +5,16 @@
 	cursor: inherit;
 }
 
-[mol_labeler_title] {
+[mol_labeler_label] {
+	min-height: 2rem;
 	color: var(--mol_theme_shade);
-	font-size: .875rem;
+	padding: .5rem .75rem 0;
+	gap: 0 var(--mol_gap_block);
+	flex-wrap: wrap;
 }
 
 [mol_labeler_content] {
 	display: flex;
+	padding: var(--mol_gap_text);
+	min-height: 2.5rem;
 }

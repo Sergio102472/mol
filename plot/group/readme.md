@@ -2,7 +2,7 @@
 
 Group of another graphs. Legend sample will be combined from samples of nested graphs.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_plot)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_plot_demo)
 
 ## Usage example
 

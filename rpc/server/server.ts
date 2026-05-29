@@ -7,11 +7,11 @@ namespace $ {
 			return new this.$.$mol_dom_listener(
 				this.$.$mol_dom_context ,
 				'message' ,
-				( event : MessageEvent )=> this.handle( event.data ) ,
+				event => $mol_wire_async(this).handle(event.data),
 			)
 		}
 
-		@ $mol_fiber_method
+		@ $mol_action
 		handle( { id , name , args } : { id : string , name : string , args : any[] } ) {
 
 			const handler = this.handlers()[ name ] || this.handlers()[ '' ]
@@ -20,14 +20,15 @@ namespace $ {
 			try {
 				const result = handler( ... args )
 				this.$.$mol_dom_context.parent.postMessage( { id , result } , '*' )
-			} catch( error ) {
+			} catch( error: any ) {
+				if( error instanceof Promise ) $mol_fail_hidden( error )
 				this.$.$mol_dom_context.parent.postMessage( { id , error : error.message } , '*' )
 			}
 
 		}
 
-		handlers() {
-			return {}
+		handlers(): Record<string, any> {
+			return {} 
 		}
 
 	}

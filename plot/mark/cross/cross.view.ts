@@ -56,7 +56,7 @@ namespace $.$$ {
 		title_x_pos_x() {
 			const nearest = this.nearest()
 			if (!nearest) return '0'
-			const width = this.text_width(this.title_x())
+			const width = this.Label_x().width()
 
 			return (nearest.scaled.x - width / 2).toFixed(3)
 		}
@@ -83,5 +83,15 @@ namespace $.$$ {
 
 			return nearest.scaled.y.toFixed(3)
 		}
+
+		title_y_pos_x() {
+			const nearest = this.nearest()
+			if (!nearest) return '0'
+
+			const pos = this.title_y_gap()
+
+			return pos.toFixed(3)
+		}
+
 	}
 }

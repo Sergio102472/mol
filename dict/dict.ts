@@ -1,32 +1,27 @@
 namespace $ {
-
-	export function $mol_dict_key( value : any ) {
-		
-		if( !value ) return value
-		if( typeof value !== 'object' ) return value
-
-		if( Array.isArray( value ) ) return value.join( ' , ' )
-		if( Object.getPrototypeOf( Object.getPrototypeOf( value ) ) === null ) return JSON.stringify( value )
-		
-		return value
-	}
 	
+	/** @deprecated */
+	export let $mol_dict_key = $mol_key
+
+	/**
+	 * Dictionary with extended keys support
+	 */
 	export class $mol_dict< Key , Value > extends Map< Key , Value > {
 
 		get( key : Key ) {
-			return super.get( $mol_dict_key( key ) )
+			return super.get( $mol_key( key ) as any )
 		}
 
 		has( key : Key ) {
-			return super.has( $mol_dict_key( key ) )
+			return super.has( $mol_key( key ) as any )
 		}
 
 		set( key : Key , value : Value ) {
-			return super.set( $mol_dict_key( key ) , value )
+			return super.set( $mol_key( key ) as any , value )
 		}
 
 		delete( key : Key ) {
-			return super.delete( $mol_dict_key( key ) )
+			return super.delete( $mol_key( key ) as any )
 		}
 
 		forEach( back : ( value : Value , key : Key , dict : Map< Key , Value > ) => void , context? : any ) {
@@ -36,26 +31,49 @@ namespace $ {
 			} , context )
 		}
 
-		[Symbol.iterator]() {
-			const iterator = super[ Symbol.iterator ]()
+		keys() {
+			const iterator = super.keys()
 			
 			return {
 				[Symbol.iterator]() {
 					return this
 				},
 				next() {
+					
 					const iteration = iterator.next()
-
-					if( !iteration.done ) {
-						const key = iteration.value[0]
-						if( typeof key === 'string' ) iteration.value[0] = JSON.parse( key )
-					}
-
+					if( iteration.done ) return iteration
+					
+					iteration.value = JSON.parse( iteration.value as any as string )
 					return iteration
+					
 				}
-			}
+			} as MapIterator<Key>
 		}
-
+		
+		entries() {
+			const iterator = super.entries()
+			
+			return {
+				[Symbol.iterator]() {
+					return this
+				},
+				next() {
+					
+					const iteration = iterator.next()
+					if( iteration.done ) return iteration
+					
+					iteration.value = [ JSON.parse( iteration.value[0] as any as string ), iteration.value[1] ]
+					// iteration.value[0] = JSON.parse( iteration.value[0] as any as string )
+					return iteration
+					
+				}
+			} as MapIterator<[Key, Value]>
+		}
+		
+		[Symbol.iterator]() {
+			return this.entries()
+		}
+		
 	}
 
 }

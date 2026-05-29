@@ -1,4 +1,8 @@
 $mol_book2 $mol_scroll
-	sub <= pages /$mol_view
+	menu_title \
+	sub /$mol_view
+		^ pages <= pages_deep /$mol_view
+		^ placeholders /$mol_view
+			<= Placeholder $mol_view
 	minimal_width 0
-	Placeholder $mol_view
+	Gap* $mol_view title \

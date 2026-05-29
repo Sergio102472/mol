@@ -1,11 +1,19 @@
 namespace $ {
 	
+	interface SpeechResultsEvent extends Event {
+		resultIndex: number
+		results: SpeechRecognitionResultList
+	}
+	
+	/**
+	 * Web Speech API
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_speech_demo
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
+	 */
 	export class $mol_speech extends $mol_plugin {
 		
-		@ $mol_mem
-		static speaker() {
-
-			return $mol_fiber_sync( ()=> new Promise< SpeechSynthesis >( done => {
+		static speaker_make() {
+			return new Promise< SpeechSynthesis >( done => {
 
 				const API = $mol_dom_context.speechSynthesis
 
@@ -19,8 +27,12 @@ namespace $ {
 
 				API.addEventListener( 'voiceschanged' , on_voices )
 			
-			} ) )()
-
+			} )
+		}
+		
+		@ $mol_mem
+		static speaker() {
+			return $mol_wire_sync( this ).speaker_make()
 		}
 
 		@ $mol_mem
@@ -29,7 +41,7 @@ namespace $ {
 			return this.speaker().getVoices().filter( voice => voice.lang.split('-')[0] === lang )
 		}
 		
-		@ $mol_mem_key
+		@ $mol_action
 		static say( text : string ) {
 			
 			const speaker = this.speaker()
@@ -63,30 +75,51 @@ namespace $ {
 		
 		@ $mol_mem
 		static hearer() {
-			const API = window['SpeechRecognition'] || window['webkitSpeechRecognition'] || window['mozSpeechRecognition'] || window['msSpeechRecognition']
 			
-			const api = new API
+			$mol_wire_solid()
+
+			let Api
+
+			for (const prefix of ['', 'webkit', 'moz', 'ms']) {
+				if (Api = (window as any)[prefix + 'SpeechRecognition']) {
+					break
+				}
+			}
+			
+			const api = new Api
 			
 			api.interimResults = true
 			api.maxAlternatives = 1
 			api.continuous = true
 			api.lang = $mol_locale.lang()
 			
-			api.onnomatch = $mol_fiber_root( ( event : any )=> {
-				this.event_result( null )
+			api.onnomatch = ( event : any )=> {
+				api.stop()
 				return null
-			})
-			api.onresult = $mol_fiber_root(( event : any )=> {
-				this.event_result( event )
+			}
+			api.onresult = ( event: SpeechResultsEvent )=> {
+				this.recognition_index( [ ... event.results ].filter( res => res.isFinal ).length )
+				const recognition = event.results[ event.resultIndex ]
+				const index = event.resultIndex + this.recognition_offset()
+				this.recognition( index, recognition )
 				return null
-			} )
-			api.onerror = $mol_fiber_root( ( event : Event )=> {
+			}
+			api.onerror = ( event : ErrorEvent )=> {
+				if( event.error === 'no-speech' ) return null
+				console.log(event)
 				console.error( new Error( ( event as any ).error || event ) )
-				this.event_result( null )
+				api.stop()
 				return null
-			} )
+			}
 			api.onend = ( event : any )=> {
+				if( this.recognition_index() > 0 ) {
+					this.recognition_offset( this.recognition_offset() + this.recognition_index() )
+				}
+				this.recognition_index( -1 )
 				if( this.hearing() ) api.start()
+			}
+			api.onspeechend = ( event : any )=> {
+				api.stop()
 			}
 			
 			return api;
@@ -106,21 +139,33 @@ namespace $ {
 		}
 
 		@ $mol_mem
-		static event_result( event? : null | Event & {
-			results : Array< { transcript : string }[] & { isFinal : boolean } >
-		} ) {
-			this.hearer()
-			return event || null
+		static recognition_index( next = -1 ) {
+			$mol_wire_solid()
+			return next
+		}
+
+		@ $mol_mem
+		static recognition_offset( next = 0 ) {
+			$mol_wire_solid()
+			return next
+		}
+		
+		@ $mol_mem_key
+		static recognition( index: number, next?: SpeechRecognitionResult ) {
+			$mol_wire_solid()
+			return next ?? null
 		}
 
 		@ $mol_mem
 		static recognitions() {
 
-			const result = this.event_result()
-			if( !result ) return []
+			if( !this.hearing() ) return []
 
-			const results = this.event_result()?.results ?? []
-			return ( [].slice.call( results ) as typeof results )
+			return $mol_range2(
+				index => this.recognition( index )!,
+				()=> Math.max( 0, this.recognition_index() + this.recognition_offset() ),
+			)
+			
 		}
 
 		@ $mol_mem
@@ -135,6 +180,7 @@ namespace $ {
 		
 		@ $mol_mem
 		commands_skip( next = 0 ) {
+			$mol_wire_solid()
 			$mol_speech.hearing()
 			return next
 		}
@@ -152,9 +198,9 @@ namespace $ {
 					const found = commands[i].match( matcher )
 					if( !found ) continue
 					
-					new $mol_defer( ()=> {
+					new $mol_after_work( 16, ()=> {
 						this.commands_skip( i + 1 )
-						this.event_catch( found.slice( 1 ) )
+						$mol_wire_async( this ).event_catch( found.slice( 1 ) )
 					} )
 					
 					return null
@@ -166,7 +212,7 @@ namespace $ {
 		}
 		
 		event_catch( found? : string[] ) {
-			console.log( found )
+			return false
 		}
 		
 		patterns() {
@@ -185,7 +231,7 @@ namespace $ {
 		}
 		
 		suffix() {
-			return '[,\\s]+(?:please|would you kindly|пожалуйста|пожалуй 100|будь любезен|будь любезна|будь добра?)\.?$'
+			return '[,\\s]+(?:please|would you kindly|пожалуйста|пожалуй 100|будь любезен|будь любезна|будь добра?|плиз)\.?$'
 		}
 		
 	}

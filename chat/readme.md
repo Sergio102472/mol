@@ -1,39 +1,23 @@
 # $mol_chat
 
-GitHub based comments.
+Button to open embedded chat.
 
-**Proof of concept, do not use it**
-
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_chat)
-
-## Repository preparing
-
-Create issue label like `$mol_chat:example.com` but with your domain. New issues will be created for every unique `link`.
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_chat_demo)
 
 ## Usage example
 
 ```
 <= Chat $mol_chat
-	repository_name \nin-jin/mol_chat
-	title <= title -
-	link <= chat_link \
+	seed <= seed \0_0
+	pages => chat_pages
 ```
 
 ## Properties
 
-**`repository_name() : string`**
+**`seed() : string`**
 
-GitHub repository full repository name like `user/repo`.
+Global unique id of chat.
 
-**`repository() : $mol_github_repository`**
+**`pages() : $mol_page[]`**
 
-Instance of GitHub repository model.
-
-**`title() : string`**
-
-Title for issue that will be created for comments.
-
-**`link() : string`**
-
-Permanent link to page where comments are displayed. Used for identity of issues.
-
+List of chat pages. Render it where you want.

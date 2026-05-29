@@ -1,112 +1,34 @@
 namespace $.$$ {
 
+	/**
+	 * Button to open embedded chat.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_chat_demo
+	 */
 	export class $mol_chat extends $.$mol_chat {
-
-		@ $mol_mem
-		repository() {
-			return $mol_github_repository.item( `https://api.github.com/repos/${ this.repository_name() }` )
+		
+		opened() {
+			return this.$.$mol_state_arg.value( 'mol_chat' ) !== null
+		}
+		
+		pages() {
+			return this.opened() ? [ this.Page() ] : []
 		}
 
 		@ $mol_mem
-		issue( next? : $mol_github_issue , force? : $mol_mem_force ) {
-
-			const repo_name = this.repository().name_full()
-
-			const search_uri = `https://api.github.com/search/issues?q=repo:${ repo_name } ${ this.seed() } in:body type:issue`
-
-			if( next ) return next
-
-			const issues = $mol_github_search_issues.item( search_uri ).items( undefined , force )
-			
-			return issues[0] || null
+		standalone() {
+			const seed = this.seed()
+			const origin = new URL( this.$.$mol_state_arg.href() ).origin
+			return `https://talks.hyoo.ru/#!chat=${ seed }`
 		}
-
+		
 		@ $mol_mem
-		issue_ensured() {
-			let issue = this.issue()
-			if( issue ) return issue
-
-			const issue_json = this.service().issue_add( this.repository().uri() , this.title() , this.teaser() )
-			issue = $mol_github_issue.item( issue_json.url )
-			issue.json_update( issue_json )
-
-			return this.issue( issue )
+		embed() {
+			const seed = this.seed()
+			const lights = String( this.$.$mol_lights() )
+			const embed = this.$.$mol_state_arg.href()
+			return `https://talks.hyoo.ru/#!chat=${ encodeURIComponent( seed ) }/mol_lights=${ lights }`
 		}
-
-		seed() {
-			return btoa( this.link() )
-		}
-
-		teaser() {
-			return `[${ this.seed() }](${ this.link() })`
-		}
-
-		@ $mol_mem
-		posts_data() {
-			const issue = this.issue()
-			if( !issue ) return []
-
-			const comments_json = this.service().comment_list( issue.uri() )
-			issue.comments().json_update( comments_json )
-
-			return issue.comments().items()
-		}
-
-		posts() {
-			return this.posts_data().map( ( _ , index )=> this.Post( index ) )
-		}
-
-		post_user_ava( index: number ) {
-			return this.posts_data()[ index ].user().avatar()
-		}
-
-		post_user_name( index: number ) {
-			return this.posts_data()[ index ].user().name()
-		}
-
-		post_user_link( index: number ) {
-			return this.posts_data()[ index ].user().link()
-		}
-
-		post_body( index: number ) {
-			return this.posts_data()[ index ].text()
-		}
-
-		post_updated( index: number ) {
-			return this.posts_data()[ index ].moment_updated()
-		}
-
-		add_submit_enabled() {
-			return this.add_body().trim().length > 0
-		}
-
-		service() {
-			return this.$.$mol_rpc_client_frame.item( '//mol.js.org/chat/service/' ).proxy() as {
-				issue_add : ( repo_uri : string , title : string , text : string )=> $mol_github_issue_json
-				comment_add : ( issue_uri : string , text : string )=> $mol_github_comment_json
-				comment_list : ( issue_uri : string )=> $mol_github_comment_json[]
-			}
-		}
-
-		@ $mol_mem
-		adding( text : string , force? : $mol_mem_force ) {
-			if( !text ) return
-
-			const comment_json = this.service().comment_add( this.issue_ensured().uri() , text )
-			const comment = $mol_github_comment.item( comment_json.url )
-			comment.json_update( comment_json )
-
-			this.issue_ensured().comments().items( [ ... this.issue_ensured().comments().items() , comment ] , $mol_mem_force_cache )
-			
-			this.add_body( '' )
-			
-			return text
-		}
-
-		add() {
-			this.adding( this.add_body() , $mol_mem_force_update )
-		}
-
+		
 	}
 
 }

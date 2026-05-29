@@ -8,40 +8,33 @@ namespace $.$$ {
 			'@': {
 				mol_drop_status: {
 					drag: {
-						boxShadow: `0 -1px 0 0px ${ $mol_theme.focus }`,
+						boxShadow: `inset 0 1px 0 0px ${ $mol_theme.focus }`,
 					},
 				},
 			},
 		},
 
-		List: {
-			padding: rem(.5),
-		},
-		
 		List_drop: {
 			'@': {
 				mol_drop_status: {
 					drag: {
-						'>' : {
-							$mol_view : {
+						// '>' : {
+						// 	$mol_view : {
 								':last-child': {
-									boxShadow: `0 1px 0 0px ${ $mol_theme.focus }`,
+									boxShadow: `inset 0 -1px 0 0px ${ $mol_theme.focus }`,
 								},
-							},
-						},
+						// 	},
+						// },
 					},
 				},
 			},
 		},
 		
-		Task_link: {
-			padding: rem(.5),
-			display: 'block',
-		},
-		
 		Trash: {
-			padding: [ rem(.5) , rem(1) ],
-			display: 'block',
+			padding: $mol_gap.text,
+			flex: {
+				grow: 1,
+			},
 		},
 
 		Trash_drop: {
@@ -56,6 +49,10 @@ namespace $.$$ {
 			},
 		},
 		
+		List: {
+			padding: $mol_gap.text,
+		},
+
 	})
 
 }

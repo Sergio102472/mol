@@ -11,7 +11,7 @@ namespace $.$$ {
 			Monitoring.renderRate.ping();
 			return ENV.generateData().toArray()
 		}
-
+		
 		databases() {
 			return Object.keys( this.data() ).map( index => this.Database( index ) )
 		}

@@ -1,14 +1,14 @@
 # $mol_switch 
 
-Buttons which switching the sate;
+Buttons which switching the state
 
-## [Online demo](http://mol.js.org/#demo=mol_switch_demo)
+## [Online demo](http://mol.hyoo.ru/#!section=demos/readme/demo=mol_switch_demo)
 
 ## Usage example
 
 ```
 <= Color $mol_switch
-	value?val <=> color?val \red
+	value? <=> color? \red
 	options <= colors *
 		red \Red
 		green \Green
@@ -27,4 +27,4 @@ Keys are possible values of `value` property. That options are labels which woul
 
 **`enabled() : boolean`**
 
-Property that turning on or off our switcher.
+Whether the switch is interactive.

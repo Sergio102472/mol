@@ -3,14 +3,14 @@ $mol_plot_ruler $mol_plot_graph
 	scale_axis 1
 	scale_step 1
 	shift_axis 1
-	dimensions_axis $mol_vector_range /
+	dimensions_axis $mol_vector_range<number> /
 		Infinity
 		-Infinity
-	viewport_axis $mol_vector_range /
+	viewport_axis $mol_vector_range<number> /
 		Infinity
 		-Infinity
 	axis_points /number
-	normalize?val 0
+	normalize? 0
 	precision 1
 	sub /
 		<= Background $mol_svg_rect
@@ -21,14 +21,14 @@ $mol_plot_ruler $mol_plot_graph
 		<= Curve $mol_svg_path
 			geometry <= curve \
 		<= labels_formatted /
-		<= Title $mol_svg_text_box
+		<= Title $mol_svg_text
 			pos_x <= title_pos_x \0
 			pos_y <= title_pos_y \100%
 			align <= title_align \start
 			text <= title
-	Label!index $mol_svg_text
-		pos <= label_pos!index /
-			<= label_pos_x!index \
-			<= label_pos_y!index \
-		text <= label_text!index \
+	Label* $mol_svg_text
+		pos <= label_pos* /
+			<= label_pos_x* \
+			<= label_pos_y* \
+		text <= label_text* \
 		align <= label_align \

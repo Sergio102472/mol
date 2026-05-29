@@ -1,22 +1,24 @@
-$mol_deck_demo $mol_demo_small
-	title @ \Simple deck with tabbar
+$mol_deck_demo $mol_example_small
+	title \Simple deck with tabbar
 	sub /
 		<= Deck $mol_deck items /
-			<= greeterItem *
-				title <= greeterLabel @ \Greeting
-				Content <= greeterContent $mol_row
-					sub /
-						<= greeterMessager $mol_view sub /
-							<= greeterMessage @ \Hello, world!
-			<= questerItem *
-				title <= questerLabel @ \Question
-				Content <= questerContent $mol_row
-					sub /
-						<= questerMessager $mol_view sub /
-							<= questerMessage @ \How are you?
-			<= commanderItem *
-				title <= commanderLabel @ \Command
-				Content <= commanderContent $mol_row
-					sub /
-						<= commanderMessager $mol_view sub /
-							<= commanderMessage @ \Let us do it right!
+			<= Greeting $mol_card
+				title \Greeting
+				content / \Hello, world!
+			<= Question $mol_card
+				title \Question
+				content / \How are you?
+			<= Answer $mol_card
+				title \Answer
+				content / \The Answer to the Ultimate Question of Life, the Universe, and Everything is 42
+			<= Command $mol_card
+				title \Command
+				content / \Let's do it right!
+			<= Spam $mol_card
+				title \Spam
+				Content <= Spam_content $mol_filler
+	tags /
+		\tabs
+		\container
+	aspects /
+		\Widget/Layout

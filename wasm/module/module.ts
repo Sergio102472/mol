@@ -5,14 +5,20 @@ namespace $ {
 		native : WebAssembly.Module
 
 		constructor(
-			readonly buffer : ArrayBuffer
+			readonly buffer : Uint8Array< ArrayBuffer >
 		) {
 			super()
 			this.native = new WebAssembly.Module( buffer )
 		}
 
-		get instance() {
-			return new $mol_wasm_instance( this.native )
+		instance<
+			Imports extends {
+				[ mod in string ]: {
+					[ func in string ]: WebAssembly.ImportValue
+				}
+			}
+		>( imports? : Imports ) {
+			return new $mol_wasm_instance( this.native , imports )
 		}
 
 	}

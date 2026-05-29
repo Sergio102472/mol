@@ -8,14 +8,14 @@ namespace $ {
 			let val = styles[ name ]
 			
 			const style = ( el as HTMLElement ).style as any
-			const cur = style[ name ]
+			const kebab = ( name : string )=> name.replace( /[A-Z]/g , letter => '-' + letter.toLowerCase() )
 			
 			if( typeof val === 'number' ) {
-				if( parseFloat( cur ) == val ) continue
-				style[ name ] = `${ val }px`
+				style.setProperty(kebab(name), `${ val }px`);
+			} else {
+				style.setProperty(kebab(name), val);
 			}
 			
-			if( cur !== val ) style[ name ] = val
 		}
 	}
 

@@ -1,35 +1,44 @@
 namespace $.$$ {
 	
+	/**
+	 * Scrolling pane.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_scroll_demo
+	 */
 	export class $mol_scroll extends $.$mol_scroll {
 
 		@ $mol_mem
-		scroll_top( next? : number ) {
-			return $mol_state_session.value( `${ this }.scroll_top()` , next ) || 0
+		scroll_top( next? : number, cache?: 'cache' ): number {
+			
+			const el = this.dom_node()
+			if( next !== undefined && !cache ) el.scrollTop = next
+			
+			return el.scrollTop
 		}
 		
 		@ $mol_mem
-		scroll_left( next? : number ) {
-			return $mol_state_session.value( `${ this }.scroll_left()` , next ) || 0
+		scroll_left( next? : number, cache?: 'cache' ): number {
+			
+			const el = this.dom_node()
+			if( next !== undefined && !cache ) el.scrollLeft = next
+			
+			return el.scrollLeft
 		}
-
-		@ $mol_memo.method
-		_event_scroll_timer( next? : $mol_after_timeout | null ) {
-			return next
-		}
-
+		
 		event_scroll( next? : Event ) {
 			
-			this._event_scroll_timer()?.destructor()
-
 			const el = this.dom_node() as HTMLElement
 			
-			this._event_scroll_timer( new $mol_after_timeout( 200 , $mol_fiber_solid.func( ()=> {
+			this.scroll_left( el.scrollLeft, 'cache' )
+			this.scroll_top( el.scrollTop, 'cache' )
+			
+		}
 
-				this.scroll_top( Math.max( 0 , el.scrollTop ) )
-				this.scroll_left( Math.max( 0 , el.scrollLeft ) )
-
-			} ) ) )
-
+		minimal_height() {
+			return this.$.$mol_print.active() ? null! : 0
+		}
+		
+		minimal_width() {
+			return this.$.$mol_print.active() ? null! : 0
 		}
 		
 	}

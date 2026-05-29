@@ -33,6 +33,8 @@ new $mol_time_moment({
 		minute : 0 ,
 	} ,
 })
+// same
+new $mol_time_moment([ 2015, 6, 18, 17, 27, 58.65, 180 ])
 ```
 
 ## Getters
@@ -75,6 +77,9 @@ new $mol_time_moment( '2015-07-19' ).shift( 'P16D' ) // new $mol_time_moment( '2
 
 // create moment by shift one to offset
 new $mol_time_moment( '2015-07-19T19:24+03:00' ).toOffset( 'Z' ) // new $mol_time_moment( '2015-07-19T16:24+00:00' )
+
+// create moment by shift one to local offset
+new $mol_time_moment( '2015-07-19T19:24+03:00' ).toOffset() // new $mol_time_moment( '2015-07-16T16:24+03:00' )
 ```
 
 ## Serialization
@@ -152,3 +157,17 @@ Speed of iso8601 parsing:
 console.time('test') ; for( var i = 0 ; i < 10000 ; ++i ) $mol_time_moment( '2015-07-20T07:48:28.338+03:00' ) ; console.timeEnd('test')
 // 40ms
 ```
+
+# Benchmarks
+
+## Parsing
+
+[![](https://i.imgur.com/03Nx1Q8.png)](https://perf.js.hyoo.ru/#prefix=const%20iso%20%3D%20'2015-07-20T07%3A48%3A28.338Z'%0A%0Alet%20res/sources=%5B%22res%20%3D%20new%20Date%28%20iso%20%29%22%2C%22res%20%3D%20new%20%24mol_time_moment%28%20iso%20%29%22%2C%22res%20%3D%20moment%28%20iso%20%29%22%2C%22res%20%3D%20luxon.DateTime.fromISO%28%20iso%20%29%22%2C%22res%20%3D%20dayjs%28%20iso%20%29%22%2C%22res%20%3D%20JSJoda.ZonedDateTime.parse%28iso%29%22%2C%22res%20%3D%20dateFns.parse%28%20iso%20%29%22%5D/postfix/prefixes=%5Bnull%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fmol_time_all%401.1.12%2Fweb.js'%5Cn%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fmoment.js%2F2.26.0%2Fmoment.min.js'%5Cn%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fluxon%401.24.1%2Fbuild%2Fglobal%2Fluxon.min.js'%5Cn%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fdayjs%401.8.21%2Fdayjs.min.js'%5Cn%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Fcdn.jsdelivr.net%2Fnpm%2F%40js-joda%2Fcore%401.11.0%2Fdist%2Fjs-joda.js'%5Cn%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fdate-fns%2F1.30.1%2Fdate_fns.min.js'%5Cn%29%22%5D)
+
+## Formatting by pattern
+
+[![](https://i.imgur.com/taT7FVD.png)](https://perf.js.hyoo.ru/#prefix=const%20iso%20%3D%20'2015-07-20T07%3A48%3A28.338Z'%0A%0Alet%20res/sources=%5B%22res%20%3D%20iMol.toString%28'DD.MM.YYYY'%29%22%2C%22res%20%3D%20iMoment.format%28'DD.MM.YYYY'%29%22%2C%22res%20%3D%20iLuxon.toUTC%28%29%5Cn.toFormat%28'dd.MM.yyyy'%29%22%2C%22res%20%3D%20iDayJS.format%28'DD.MM.YYYY'%29%22%2C%22res%20%3D%20iJSJoda.format%28pattern%29%22%5D/postfix=%24mol_assert_equal%28%20res%2C%20'20.07.2015'%20%29/prefixes=%5B%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fmol_time_all%401.1.12%2Fweb.js'%5Cn%29%5Cnconst%20iMol%20%3D%20new%20%24mol_time_moment%28%20iso%20%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fmoment.js%2F2.26.0%2Fmoment.min.js'%5Cn%29%5Cnconst%20iMoment%20%3D%20moment%28%20iso%20%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fluxon%401.24.1%2Fbuild%2Fglobal%2Fluxon.min.js'%5Cn%29%5Cnconst%20iLuxon%20%3D%20luxon.DateTime.fromISO%28%20iso%20%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Funpkg.com%2Fdayjs%401.8.21%2Fdayjs.min.js'%5Cn%29%5Cnconst%20iDayJS%20%3D%20dayjs%28%20iso%20%29%22%2C%22%24mol_import.script%28%5Cn%5Ct'https%3A%2F%2Fcdn.jsdelivr.net%2Fnpm%2F%40js-joda%2Fcore%401.11.0%2Fdist%2Fjs-joda.js'%5Cn%29%5Cnconst%20pattern%20%3D%20JSJoda.DateTimeFormatter.ofPattern%28'dd.MM.yyyy'%29%5Cnconst%20iJSJoda%20%3D%20JSJoda.ZonedDateTime.parse%28%20iso%20%29%22%5D)
+
+## Localized output
+
+[![](https://pbs.twimg.com/media/EjL10SqX0AEq1JS?format=png&name=large)](https://perf.js.hyoo.ru/#prefix=%24mol_import.script%28'https%3A%2F%2Funpkg.com%2Fmol_time_all%401.1.11%2Fweb.js'%29%0Aconst%20locale%20%3D%20%24mol_locale.lang%28%29%0A%0A%24mol_import.script%28'https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fmoment.js%2F2.26.0%2Fmoment-with-locales.min.js'%29%0Amoment.locale%28%20locale%20%29%0A%0A%24mol_import.script%28'https%3A%2F%2Funpkg.com%2Fluxon%401.24.1%2Fbuild%2Fglobal%2Fluxon.min.js'%29%0Aluxon.Settings.defaultLocale%20%3D%20locale%0A%0A%24mol_import.script%28'https%3A%2F%2Funpkg.com%2Fdayjs%401.8.21%2Fdayjs.min.js'%29%0A%24mol_import.script%28%60https%3A%2F%2Funpkg.com%2Fdayjs%401.8.21%2Flocale%2F%24%7Blocale%7D.js%60%29%0Adayjs.locale%28%20locale%20%29%0A%0A%24mol_import.script%28'https%3A%2F%2Fcdn.jsdelivr.net%2Fnpm%2F%40js-joda%2Fcore%401.11.0%2Fdist%2Fjs-joda.min.js'%29%0A%24mol_import.script%28'https%3A%2F%2Fcdn.jsdelivr.net%2Fnpm%2F%40js-joda%2Flocale_en'%29%0Aconst%20yodaPattern%20%3D%20JSJoda.DateTimeFormatter.ofPattern%28'dd%20MMMM%20yyyy'%29.withLocale%28JSJodaLocale.Locale.US%29%0A%0A%24mol_import.script%28'https%3A%2F%2Fcdnjs.cloudflare.com%2Fajax%2Flibs%2Fdate-fns%2F1.30.1%2Fdate_fns.min.js'%29%0A%0Alet%20iso%20%3D%20'2015-07-20T07%3A48%3A28.338Z'%0Alet%20res/sources=%5B%22res%20%3D%20new%20%24mol_time_moment%28iso%29%5Cn.toString%28'DD%20Month%20YYYY'%29%22%2C%22res%20%3D%20moment%28iso%29%5Cn.format%28'DD%20MMMM%20YYYY'%29%22%2C%22res%20%3D%20luxon.DateTime.fromISO%28iso%29.toUTC%28%29%5Cn.toFormat%28'dd%20MMMM%20yyyy'%29%22%2C%22res%20%3D%20dayjs%28%20iso%20%29%5Cn.format%28'DD%20MMMM%20YYYY'%29%22%2C%22res%20%3D%20JSJoda.ZonedDateTime.parse%28iso%29%5Cn.format%28yodaPattern%29%22%2C%22res%20%3D%20dateFns.format%28%5Cn%5CtdateFns.parse%28%20iso%20%29%2C%5Cn%5Ct'DD%20MMMM%20YYYY'%2C%5Cn%29%22%5D/postfix=%24mol_assert_equal%28%20res%20%2C%20'20%20%D0%B8%D1%8E%D0%BB%D1%8F%202015'%20%29%0A)

@@ -2,12 +2,15 @@
 	flex: 0 0 auto;
 	justify-content: flex-start;
 	align-content: center;
-	align-items: flex-start;
+	/* align-items: flex-start; */
 	border: none;
 	font-weight: inherit;
 	box-shadow: none;
 	text-align: left;
-	padding: .5rem;
 	display: inline-flex;
 	flex-wrap: nowrap;
+}
+
+[mol_check_title] {
+	flex-shrink: 1;
 }

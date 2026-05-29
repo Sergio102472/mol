@@ -2,13 +2,13 @@
 
 Search input with suggest and clear button.
 
-## [Online demo](http://eigenmethod.github.io/mol/#demo=mol_search)
+## [Online demo](https://mol.hyoo.ru/#!section=demos/readme/demo=mol_search_demo)
 
 ## Usage example
 
 ```
 <= Words $mol_search
-	query?val <=> word?val \
+	query? <=> word? \
 	suggests <= suggests /
 		\delirious
 		\stupendous

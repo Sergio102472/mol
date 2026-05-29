@@ -1,15 +1,12 @@
 namespace $.$$ {
 
+	/**
+	 * Mixin view logic to DOM node of another component.
+	 */
 	export class $mol_ghost extends $.$mol_ghost {
 		
-		@ $mol_mem
-		dom_node() {
-			const node = this.Sub().dom_node()
-
-			$mol_dom_render_attributes( node , this.attr_static() )
-			$mol_dom_render_events( node , this.event() )
-			
-			return node
+		override dom_node_external( next?: Element ) {
+			return this.Sub().dom_node( next )
 		}
 		
 		@ $mol_mem
@@ -29,9 +26,17 @@ namespace $.$$ {
 		}
 		
 		dom_tree() {
+			
 			const Sub = this.Sub()
 			const node = Sub.dom_tree()
-			this.dom_node_actual()
+			
+			try {
+				this.dom_node_actual()
+				this.auto()
+			} catch( error: unknown ) {
+				$mol_fail_log( error )
+			}
+			
 			return node
 		}
 

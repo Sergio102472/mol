@@ -1,10 +1,13 @@
 $mol_plot_line $mol_plot_graph
-	threshold 4
+	threshold 1
 	spacing 2
 	color_fill \none
+	dom_name \path
+	attr *
+		^
+		d <= curve \
 	sub /
-		<= Curve $mol_svg_path
-			geometry <= curve \
+		<= Hint
 	-
 	Sample $mol_plot_graph_sample
 		color <= color

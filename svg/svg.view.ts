@@ -1,11 +1,12 @@
 namespace $.$$ {
+	/** Base SVG component to display SVG images or icons. */
 	export class $mol_svg extends $.$mol_svg {
 		@$mol_mem
 		computed_style() {
 			const win = this.$.$mol_dom_context
-			const style = win.getComputedStyle(this.dom_node())
+			const style = win.getComputedStyle(this.dom_node()) as Record<string, any>
 
-			if(!style['font-size']) $mol_state_time.now()
+			if(!style['font-size']) $mol_state_time.now( 0 )
 
 			return style
 		}
@@ -20,8 +21,5 @@ namespace $.$$ {
 			return this.computed_style()['font-family']
 		}
 
-		text_width(text: string): number {
-			return $mol_font_measure(this.font_size(), this.font_family(), text)
-		}
 	}
 }

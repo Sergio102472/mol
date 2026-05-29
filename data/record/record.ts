@@ -1,6 +1,12 @@
 namespace $ {
 
-	export function $mol_data_record< Sub extends Record< string , $mol_data_value< any > > >( sub : Sub ) {
+	/**
+	 * Checks for record of given fields with by its runtypes and returns expected type.
+	 * @see https://mol.hyoo.ru/#!section=demos/demo=mol_data_record_demo
+	 */
+	export function $mol_data_record<
+		Sub extends Record< string , $mol_data_value >
+	>( sub : Sub ) {
 
 		type Input = $mol_type_partial_undefined<{
 			[ key in keyof Sub ] : Parameters< Sub[key] >[0]
@@ -17,10 +23,11 @@ namespace $ {
 			for( const field in sub ) {
 
 				try {
-					res[field] = sub[field]( val[field] )
-				} catch( error ) {
+					res[field as any as keyof Output ] =
+						sub[field]( ( val as Input )[ field as any as keyof Input ] )
+				} catch( error: any ) {
 
-					if( 'then' in error ) return $mol_fail_hidden( error )
+					if( error instanceof Promise ) return $mol_fail_hidden( error )
 					
 					error.message = `[${ JSON.stringify( field ) }] ${ error.message }`
 					return $mol_fail( error )
